@@ -24,6 +24,7 @@ pub struct App {
     executor: JqExecutor,
     query_result: Result<String, String>,
     focus: Focus,
+    results_scroll: u16,
     should_quit: bool,
 }
 
@@ -56,6 +57,7 @@ impl App {
             executor,
             query_result,
             focus: Focus::InputField, // Start with input field focused
+            results_scroll: 0,
             should_quit: false,
         }
     }
@@ -79,41 +81,84 @@ impl App {
 
     /// Handle key press events
     fn handle_key_event(&mut self, key: KeyEvent) {
-        // Handle Ctrl+C
-        if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
-            self.should_quit = true;
-            return;
+        // Try global keys first
+        if self.handle_global_keys(key) {
+            return; // Key was handled globally
         }
 
-        // Handle Tab key to switch focus
+        // Not a global key, delegate to focused pane
+        match self.focus {
+            Focus::InputField => self.handle_input_field_key(key),
+            Focus::ResultsPane => self.handle_results_pane_key(key),
+        }
+    }
+
+    /// Handle global keys that work regardless of focus
+    /// Returns true if key was handled, false otherwise
+    fn handle_global_keys(&mut self, key: KeyEvent) -> bool {
+        // Ctrl+C: Exit application
+        if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            self.should_quit = true;
+            return true;
+        }
+
+        // Tab: Switch focus between panes
         if key.code == KeyCode::Tab {
             self.focus = match self.focus {
                 Focus::InputField => Focus::ResultsPane,
                 Focus::ResultsPane => Focus::InputField,
             };
+            return true;
+        }
+
+        // ESC or q: Exit application
+        if matches!(key.code, KeyCode::Esc | KeyCode::Char('q')) {
+            self.should_quit = true;
+            return true;
+        }
+
+        false // Key not handled
+    }
+
+    /// Handle keys when Input field is focused
+    fn handle_input_field_key(&mut self, key: KeyEvent) {
+        // Prevent newlines (Enter key does nothing)
+        if key.code == KeyCode::Enter {
             return;
         }
 
+        // Pass key to textarea for editing
+        let content_changed = self.textarea.input(key);
+
+        // Execute query on every keystroke that changes content
+        if content_changed {
+            let query = self.textarea.lines()[0].as_ref();
+            self.query_result = self.executor.execute(query);
+            // Reset scroll when query changes
+            self.results_scroll = 0;
+        }
+    }
+
+    /// Handle keys when Results pane is focused
+    fn handle_results_pane_key(&mut self, key: KeyEvent) {
         match key.code {
-            KeyCode::Esc | KeyCode::Char('q') => {
-                self.should_quit = true;
+            KeyCode::Up | KeyCode::Char('k') => {
+                self.results_scroll = self.results_scroll.saturating_sub(1);
             }
-            KeyCode::Enter => {
-                // Prevent newlines in single-line input (do nothing)
+            KeyCode::Down | KeyCode::Char('j') => {
+                self.results_scroll = self.results_scroll.saturating_add(1);
+            }
+            KeyCode::PageUp | KeyCode::Char('K') => {
+                self.results_scroll = self.results_scroll.saturating_sub(10);
+            }
+            KeyCode::PageDown | KeyCode::Char('J') => {
+                self.results_scroll = self.results_scroll.saturating_add(10);
+            }
+            KeyCode::Home => {
+                self.results_scroll = 0;
             }
             _ => {
-                // Only handle input when Query field is focused
-                if self.focus == Focus::InputField {
-                    // Pass key to textarea for editing
-                    let content_changed = self.textarea.input(key);
-
-                    // Execute query on every keystroke that changes content
-                    if content_changed {
-                        let query = self.textarea.lines()[0].as_ref();
-                        self.query_result = self.executor.execute(query);
-                    }
-                }
-                // Results pane navigation will be handled in v0.6.0
+                // Ignore other keys in Results pane
             }
         }
     }
@@ -184,7 +229,10 @@ impl App {
             }
         };
 
-        let content = Paragraph::new(text).block(block).style(style);
+        let content = Paragraph::new(text)
+            .block(block)
+            .style(style)
+            .scroll((self.results_scroll, 0)); // Apply vertical scroll
 
         frame.render_widget(content, area);
     }
