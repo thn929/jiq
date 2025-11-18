@@ -4,10 +4,10 @@ Interactive command-line tool for querying JSON data in real-time using jq synta
 
 ## Requirements
 
+
 - **jq** - JSON processor (required)
-  - macOS: `brew install jq`
-  - Linux: `sudo apt-get install jq` or `sudo dnf install jq`
-  - More: https://jqlang.org/download/
+  - MacOS: `brew install jq`
+  - Linux: See https://jqlang.org/download/
 
 ## Installation
 
@@ -17,11 +17,6 @@ git clone https://github.com/bellicose100xp/jiq
 cd jiq
 cargo build --release
 sudo cp target/release/jiq /usr/local/bin/
-```
-
-### From Cargo
-```sh
-cargo install --path .
 ```
 
 ## Usage
@@ -56,7 +51,7 @@ curl https://api.example.com/data | jiq
 | `Enter` | Exit and output filtered JSON results |
 | `Shift+Enter` | Exit and output query string only |
 | `q` | Quit without output |
-| `Ctrl+C` | Quit without output |
+| `Ctrl+C`  | Quit without output |
 
 ### Input Field (when focused)
 | Key | Action |
@@ -104,14 +99,6 @@ echo $QUERY | xargs -I {} jq {} data.json
 - **Invalid queries** display jq error messages in red
 - **Results auto-scroll** to top when query changes
 - **Help text** at bottom shows available keys for focused pane
-
-## Technical Details
-
-- Built with Rust using Ratatui TUI framework
-- Uses `tui-textarea` for text editing
-- Shells out to `jq` binary for query execution
-- ANSI color codes parsed with `ansi-to-tui`
-- Supports piped stdin via crossterm's `use-dev-tty` feature
 
 ## License
 
