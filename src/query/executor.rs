@@ -24,8 +24,9 @@ impl JqExecutor {
         // Empty query defaults to identity filter
         let query = if query.trim().is_empty() { "." } else { query };
 
-        // Spawn jq process (plain output for now, colors in future version)
+        // Spawn jq process with color output
         let mut child = Command::new("jq")
+            .arg("--color-output")
             .arg(query)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

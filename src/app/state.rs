@@ -52,8 +52,8 @@ impl App {
         // Create JQ executor
         let executor = JqExecutor::new(json_input.clone());
 
-        // Initially show original JSON (identity filter)
-        let query_result = Ok(json_input.clone());
+        // Initial result text on startup 
+        let query_result = executor.execute(".");
 
         Self {
             json_input,
