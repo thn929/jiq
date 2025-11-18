@@ -1,5 +1,6 @@
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::io;
+use tui_textarea::CursorMove;
 
 use crate::editor::EditorMode;
 use super::state::{App, Focus, OutputMode};
@@ -86,6 +87,7 @@ impl App {
         match self.editor_mode {
             EditorMode::Insert => self.handle_insert_mode_key(key),
             EditorMode::Normal => self.handle_normal_mode_key(key),
+            EditorMode::Operator(_) => self.handle_operator_mode_key(key),
         }
     }
 
@@ -106,16 +108,65 @@ impl App {
     /// Handle keys in Normal mode (VIM navigation and commands)
     fn handle_normal_mode_key(&mut self, key: KeyEvent) {
         match key.code {
-            // i - Enter Insert mode at cursor
+            // Basic cursor movement (h/l)
+            KeyCode::Char('h') | KeyCode::Left => {
+                self.textarea.move_cursor(CursorMove::Back);
+            }
+            KeyCode::Char('l') | KeyCode::Right => {
+                self.textarea.move_cursor(CursorMove::Forward);
+            }
+
+            // Line extent movement (0/$)
+            KeyCode::Char('0') | KeyCode::Home => {
+                self.textarea.move_cursor(CursorMove::Head);
+            }
+            KeyCode::Char('$') | KeyCode::End => {
+                self.textarea.move_cursor(CursorMove::End);
+            }
+
+            // Word movement (w/b/e)
+            KeyCode::Char('w') => {
+                self.textarea.move_cursor(CursorMove::WordForward);
+            }
+            KeyCode::Char('b') => {
+                self.textarea.move_cursor(CursorMove::WordBack);
+            }
+            KeyCode::Char('e') => {
+                self.textarea.move_cursor(CursorMove::WordEnd);
+            }
+
+            // Enter Insert mode commands
             KeyCode::Char('i') => {
+                // i - Insert at cursor
+                self.editor_mode = EditorMode::Insert;
+            }
+            KeyCode::Char('a') => {
+                // a - Append (insert after cursor)
+                self.textarea.move_cursor(CursorMove::Forward);
+                self.editor_mode = EditorMode::Insert;
+            }
+            KeyCode::Char('I') => {
+                // I - Insert at line start
+                self.textarea.move_cursor(CursorMove::Head);
+                self.editor_mode = EditorMode::Insert;
+            }
+            KeyCode::Char('A') => {
+                // A - Append at line end
+                self.textarea.move_cursor(CursorMove::End);
                 self.editor_mode = EditorMode::Insert;
             }
 
             _ => {
-                // TODO: Implement other VIM navigation commands
-                // For now, ignore other keys in Normal mode
+                // Other VIM commands not yet implemented
             }
         }
+    }
+
+    /// Handle keys in Operator mode (waiting for motion after d/c)
+    fn handle_operator_mode_key(&mut self, _key: KeyEvent) {
+        // TODO: Implement operator+motion system
+        // For now, just cancel and return to Normal
+        self.editor_mode = EditorMode::Normal;
     }
 
     /// Handle keys when Results pane is focused

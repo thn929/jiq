@@ -5,6 +5,8 @@ pub enum EditorMode {
     Insert,
     /// Normal mode - VIM navigation and commands
     Normal,
+    /// Operator mode - waiting for motion after operator (d or c)
+    Operator(char),
 }
 
 impl Default for EditorMode {
@@ -15,10 +17,11 @@ impl Default for EditorMode {
 
 impl EditorMode {
     /// Get the display string for the mode indicator
-    pub fn display(&self) -> &str {
+    pub fn display(&self) -> String {
         match self {
-            EditorMode::Insert => "INSERT",
-            EditorMode::Normal => "NORMAL",
+            EditorMode::Insert => "INSERT".to_string(),
+            EditorMode::Normal => "NORMAL".to_string(),
+            EditorMode::Operator(op) => format!("OPERATOR({})", op),
         }
     }
 }
@@ -36,5 +39,7 @@ mod tests {
     fn test_mode_display() {
         assert_eq!(EditorMode::Insert.display(), "INSERT");
         assert_eq!(EditorMode::Normal.display(), "NORMAL");
+        assert_eq!(EditorMode::Operator('d').display(), "OPERATOR(d)");
+        assert_eq!(EditorMode::Operator('c').display(), "OPERATOR(c)");
     }
 }

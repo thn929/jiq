@@ -1,12 +1,13 @@
 use ansi_to_tui::IntoText;
 use ratatui::{
     layout::{Constraint, Layout},
-    style::{Color, Style},
-    text::Text,
+    style::{Color, Modifier, Style},
+    text::{Line, Span, Text},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
 
+use crate::editor::EditorMode;
 use super::state::{App, Focus};
 
 impl App {
@@ -36,17 +37,37 @@ impl App {
 
     /// Render the input field (bottom)
     fn render_input_field(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
-        // Set border color based on focus
-        let border_color = if self.focus == Focus::InputField {
-            Color::Cyan // Focused
-        } else {
-            Color::DarkGray // Unfocused
+        // Choose color based on mode
+        let mode_color = match self.editor_mode {
+            EditorMode::Insert => Color::Cyan,        // Cyan for Insert
+            EditorMode::Normal => Color::Yellow,      // Yellow for Normal
+            EditorMode::Operator(_) => Color::Green,  // Green for Operator
         };
 
-        // Build title with mode indicator
-        let title = format!(" Query [{}] ", self.editor_mode.display());
+        // Set border color - mode color when focused, gray when unfocused
+        let border_color = if self.focus == Focus::InputField {
+            mode_color
+        } else {
+            Color::DarkGray
+        };
 
-        // Update textarea block with focus-aware styling and mode indicator
+        // Build title with colored mode indicator
+        let mode_text = self.editor_mode.display();
+        let title = Line::from(vec![
+            Span::raw(" Query ["),
+            Span::styled(mode_text, Style::default().fg(mode_color)),
+            Span::raw("] "),
+        ]);
+
+        // Set cursor color based on mode
+        let cursor_style = match self.editor_mode {
+            EditorMode::Insert => Style::default().fg(Color::Cyan).add_modifier(Modifier::REVERSED),
+            EditorMode::Normal => Style::default().fg(Color::Yellow).add_modifier(Modifier::REVERSED),
+            EditorMode::Operator(_) => Style::default().fg(Color::Green).add_modifier(Modifier::REVERSED),
+        };
+        self.textarea.set_cursor_style(cursor_style);
+
+        // Update textarea block with mode-aware styling
         self.textarea.set_block(
             Block::default()
                 .borders(Borders::ALL)
