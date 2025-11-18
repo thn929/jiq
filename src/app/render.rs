@@ -43,11 +43,14 @@ impl App {
             Color::DarkGray // Unfocused
         };
 
-        // Update textarea block with focus-aware styling
+        // Build title with mode indicator
+        let title = format!(" Query [{}] ", self.editor_mode.display());
+
+        // Update textarea block with focus-aware styling and mode indicator
         self.textarea.set_block(
             Block::default()
                 .borders(Borders::ALL)
-                .title(" Query ")
+                .title(title)
                 .border_style(Style::default().fg(border_color)),
         );
 

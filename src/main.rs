@@ -4,6 +4,7 @@ use ratatui::DefaultTerminal;
 use std::path::PathBuf;
 
 mod app;
+mod editor;
 mod error;
 mod input;
 mod query;

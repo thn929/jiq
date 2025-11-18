@@ -4,6 +4,7 @@ use ratatui::{
 };
 use tui_textarea::TextArea;
 
+use crate::editor::EditorMode;
 use crate::query::executor::JqExecutor;
 
 /// Which pane has focus
@@ -26,6 +27,7 @@ pub struct App {
     pub executor: JqExecutor,
     pub query_result: Result<String, String>,
     pub focus: Focus,
+    pub editor_mode: EditorMode,
     pub results_scroll: u16,
     pub results_viewport_height: u16,
     pub output_mode: Option<OutputMode>,
@@ -60,6 +62,7 @@ impl App {
             executor,
             query_result,
             focus: Focus::InputField, // Start with input field focused
+            editor_mode: EditorMode::default(), // Start in Insert mode
             results_scroll: 0,
             results_viewport_height: 0, // Will be set during first render
             output_mode: None, // No output mode set until Enter/Shift+Enter

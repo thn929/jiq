@@ -1,6 +1,7 @@
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::io;
 
+use crate::editor::EditorMode;
 use super::state::{App, Focus, OutputMode};
 
 impl App {
@@ -75,7 +76,22 @@ impl App {
 
     /// Handle keys when Input field is focused
     fn handle_input_field_key(&mut self, key: KeyEvent) {
-        // Pass key to textarea for editing
+        // Handle ESC - always switches to Normal mode
+        if key.code == KeyCode::Esc {
+            self.editor_mode = EditorMode::Normal;
+            return;
+        }
+
+        // Handle input based on current mode
+        match self.editor_mode {
+            EditorMode::Insert => self.handle_insert_mode_key(key),
+            EditorMode::Normal => self.handle_normal_mode_key(key),
+        }
+    }
+
+    /// Handle keys in Insert mode
+    fn handle_insert_mode_key(&mut self, key: KeyEvent) {
+        // Use textarea's built-in input handling
         let content_changed = self.textarea.input(key);
 
         // Execute query on every keystroke that changes content
@@ -84,6 +100,21 @@ impl App {
             self.query_result = self.executor.execute(query);
             // Reset scroll when query changes
             self.results_scroll = 0;
+        }
+    }
+
+    /// Handle keys in Normal mode (VIM navigation and commands)
+    fn handle_normal_mode_key(&mut self, key: KeyEvent) {
+        match key.code {
+            // i - Enter Insert mode at cursor
+            KeyCode::Char('i') => {
+                self.editor_mode = EditorMode::Insert;
+            }
+
+            _ => {
+                // TODO: Implement other VIM navigation commands
+                // For now, ignore other keys in Normal mode
+            }
         }
     }
 
