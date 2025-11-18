@@ -1,0 +1,5 @@
+{
+  "name": "Invalid",
+  "missing_quote: "value",
+  "trailing_comma": true,
+}

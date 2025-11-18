@@ -1,0 +1,28 @@
+{
+  "company": "TechCorp",
+  "departments": {
+    "engineering": {
+      "employees": [
+        {
+          "name": "Alice",
+          "role": "Engineer",
+          "projects": ["Project A", "Project B"]
+        },
+        {
+          "name": "Bob",
+          "role": "Manager",
+          "projects": ["Project C"]
+        }
+      ]
+    },
+    "sales": {
+      "employees": [
+        {
+          "name": "Charlie",
+          "role": "Sales Rep",
+          "projects": []
+        }
+      ]
+    }
+  }
+}

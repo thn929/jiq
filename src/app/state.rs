@@ -51,7 +51,7 @@ impl App {
         // Create JQ executor
         let executor = JqExecutor::new(json_input.clone());
 
-        // Initial result text on startup 
+        // Initial result text on startup
         let query_result = executor.execute(".");
 
         Self {
@@ -78,5 +78,101 @@ impl App {
     /// Get the current query text
     pub fn query(&self) -> &str {
         self.textarea.lines()[0].as_ref()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_app_initialization() {
+        let json = r#"{"name": "Alice", "age": 30}"#;
+        let app = App::new(json.to_string());
+
+        // Check default state
+        assert_eq!(app.focus, Focus::InputField);
+        assert_eq!(app.results_scroll, 0);
+        assert_eq!(app.output_mode, None);
+        assert!(!app.should_quit);
+        assert_eq!(app.query(), "");
+    }
+
+    #[test]
+    fn test_initial_query_result() {
+        let json = r#"{"name": "Bob"}"#;
+        let app = App::new(json.to_string());
+
+        // Initial query should execute identity filter "."
+        assert!(app.query_result.is_ok());
+        let result = app.query_result.as_ref().unwrap();
+        assert!(result.contains("Bob"));
+    }
+
+    #[test]
+    fn test_focus_enum() {
+        assert_eq!(Focus::InputField, Focus::InputField);
+        assert_eq!(Focus::ResultsPane, Focus::ResultsPane);
+        assert_ne!(Focus::InputField, Focus::ResultsPane);
+    }
+
+    #[test]
+    fn test_output_mode_enum() {
+        assert_eq!(OutputMode::Results, OutputMode::Results);
+        assert_eq!(OutputMode::Query, OutputMode::Query);
+        assert_ne!(OutputMode::Results, OutputMode::Query);
+    }
+
+    #[test]
+    fn test_should_quit_getter() {
+        let json = r#"{}"#;
+        let mut app = App::new(json.to_string());
+
+        assert!(!app.should_quit());
+
+        app.should_quit = true;
+        assert!(app.should_quit());
+    }
+
+    #[test]
+    fn test_output_mode_getter() {
+        let json = r#"{}"#;
+        let mut app = App::new(json.to_string());
+
+        assert_eq!(app.output_mode(), None);
+
+        app.output_mode = Some(OutputMode::Results);
+        assert_eq!(app.output_mode(), Some(OutputMode::Results));
+
+        app.output_mode = Some(OutputMode::Query);
+        assert_eq!(app.output_mode(), Some(OutputMode::Query));
+    }
+
+    #[test]
+    fn test_query_getter_empty() {
+        let json = r#"{"test": true}"#;
+        let app = App::new(json.to_string());
+
+        assert_eq!(app.query(), "");
+    }
+
+    #[test]
+    fn test_app_with_empty_json_object() {
+        let json = "{}";
+        let app = App::new(json.to_string());
+
+        assert!(app.query_result.is_ok());
+    }
+
+    #[test]
+    fn test_app_with_json_array() {
+        let json = r#"[1, 2, 3]"#;
+        let app = App::new(json.to_string());
+
+        assert!(app.query_result.is_ok());
+        let result = app.query_result.as_ref().unwrap();
+        assert!(result.contains("1"));
+        assert!(result.contains("2"));
+        assert!(result.contains("3"));
     }
 }
