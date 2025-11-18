@@ -51,13 +51,24 @@ impl App {
             Color::DarkGray
         };
 
-        // Build title with colored mode indicator
+        // Build title with colored mode indicator and hint
         let mode_text = self.editor_mode.display();
-        let title = Line::from(vec![
-            Span::raw(" Query ["),
-            Span::styled(mode_text, Style::default().fg(mode_color)),
-            Span::raw("] "),
-        ]);
+        let title = match self.editor_mode {
+            EditorMode::Normal => {
+                Line::from(vec![
+                    Span::raw(" Query ["),
+                    Span::styled(mode_text, Style::default().fg(mode_color)),
+                    Span::raw("] (press 'i' to edit) "),
+                ])
+            }
+            _ => {
+                Line::from(vec![
+                    Span::raw(" Query ["),
+                    Span::styled(mode_text, Style::default().fg(mode_color)),
+                    Span::raw("] "),
+                ])
+            }
+        };
 
         // Set cursor color based on mode
         let cursor_style = match self.editor_mode {

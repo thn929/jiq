@@ -180,6 +180,18 @@ impl App {
                 self.textarea.start_selection();
             }
 
+            // Undo/Redo
+            KeyCode::Char('u') => {
+                // u - Undo
+                self.textarea.undo();
+                self.execute_query();
+            }
+            KeyCode::Char('r') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                // Ctrl+r - Redo
+                self.textarea.redo();
+                self.execute_query();
+            }
+
             _ => {
                 // Other VIM commands not yet implemented
             }

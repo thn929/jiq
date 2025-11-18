@@ -33,11 +33,14 @@ curl https://api.example.com/data | jiq
 
 ## Interactive Mode
 
-1. **Type jq queries** in the input field (bottom pane)
+jiq features **full VIM keybindings** for efficient editing and navigation.
+
+1. **Type jq queries** in the input field (bottom pane) - starts in INSERT mode
 2. **See results instantly** in the results pane (top pane)
-3. **Press Tab** to switch focus between panes
-4. **Scroll results** when focused (arrow keys, j/k, Page Up/Down)
-5. **Exit with output:**
+3. **Press ESC** to enter NORMAL mode for VIM navigation
+4. **Press Tab** to switch focus between panes
+5. **Scroll results** with VIM keys when focused
+6. **Exit with output:**
    - **Enter** → Output filtered JSON results
    - **Shift+Enter** → Output query string only (for scripting)
    - **q** or **Ctrl+C** → Exit without output
@@ -53,13 +56,53 @@ curl https://api.example.com/data | jiq
 | `q` | Quit without output |
 | `Ctrl+C`  | Quit without output |
 
-### Input Field (when focused)
+### Input Field - VIM Modes
+
+jiq uses VIM-style modal editing with **INSERT** and **NORMAL** modes.
+
+#### INSERT Mode (default, cyan border)
 | Key | Action |
 |-----|--------|
-| Type characters | Edit jq query |
+| Type characters | Edit jq query (real-time execution) |
 | `←/→` | Move cursor |
 | `Home/End` | Jump to start/end of line |
 | `Backspace/Delete` | Delete characters |
+| `ESC` | Switch to NORMAL mode |
+
+#### NORMAL Mode (yellow border)
+| Key | Action |
+|-----|--------|
+| **Navigation** | |
+| `h` / `←` | Move cursor left |
+| `l` / `→` | Move cursor right |
+| `0` / `Home` | Jump to line start |
+| `$` / `End` | Jump to line end |
+| `w` | Jump to next word start |
+| `b` | Jump to previous word start |
+| `e` | Jump to next word end |
+| **Insert Commands** | |
+| `i` | Enter INSERT mode at cursor |
+| `a` | Enter INSERT mode after cursor |
+| `I` | Enter INSERT mode at line start |
+| `A` | Enter INSERT mode at line end |
+| **Delete** | |
+| `x` | Delete character at cursor |
+| `X` | Delete character before cursor |
+| `dw` | Delete word forward |
+| `db` | Delete word backward |
+| `de` | Delete to word end |
+| `d$` | Delete to line end |
+| `d0` | Delete to line start |
+| `dd` | Delete entire line |
+| **Change (delete + insert)** | |
+| `cw` | Change word forward |
+| `cb` | Change word backward |
+| `ce` | Change to word end |
+| `c$` | Change to line end |
+| `cc` | Change entire line |
+| **Undo/Redo** | |
+| `u` | Undo last change |
+| `Ctrl+r` | Redo last undone change |
 
 ### Results Pane (when focused)
 | Key | Action |
