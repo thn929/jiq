@@ -64,9 +64,12 @@ curl https://api.example.com/data | jiq
 ### Results Pane (when focused)
 | Key | Action |
 |-----|--------|
-| `↑/↓` or `j/k` | Scroll line by line |
-| `J/K` or `PgUp/PgDn` | Scroll page by page (10 lines) |
-| `Home` | Jump to top |
+| `↑/↓` or `j/k` | Scroll up/down 1 line |
+| `J/K` | Scroll up/down 10 lines |
+| `Ctrl+u` / `PageUp` | Scroll up half page |
+| `Ctrl+d` / `PageDown` | Scroll down half page |
+| `g` / `Home` | Jump to top |
+| `G` | Jump to bottom |
 
 ## Examples
 

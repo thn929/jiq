@@ -27,6 +27,7 @@ pub struct App {
     pub query_result: Result<String, String>,
     pub focus: Focus,
     pub results_scroll: u16,
+    pub results_viewport_height: u16,
     pub output_mode: Option<OutputMode>,
     pub should_quit: bool,
 }
@@ -60,6 +61,7 @@ impl App {
             query_result,
             focus: Focus::InputField, // Start with input field focused
             results_scroll: 0,
+            results_viewport_height: 0, // Will be set during first render
             output_mode: None, // No output mode set until Enter/Shift+Enter
             should_quit: false,
         }
@@ -78,6 +80,20 @@ impl App {
     /// Get the current query text
     pub fn query(&self) -> &str {
         self.textarea.lines()[0].as_ref()
+    }
+
+    /// Get the total number of lines in the current results
+    pub fn results_line_count(&self) -> u16 {
+        match &self.query_result {
+            Ok(result) => result.lines().count() as u16,
+            Err(error) => error.lines().count() as u16,
+        }
+    }
+
+    /// Get the maximum scroll position based on content and viewport
+    pub fn max_scroll(&self) -> u16 {
+        let total_lines = self.results_line_count();
+        total_lines.saturating_sub(self.results_viewport_height)
     }
 }
 

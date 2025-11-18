@@ -90,21 +90,52 @@ impl App {
     /// Handle keys when Results pane is focused
     fn handle_results_pane_key(&mut self, key: KeyEvent) {
         match key.code {
+            // Basic line scrolling (1 line)
             KeyCode::Up | KeyCode::Char('k') => {
                 self.results_scroll = self.results_scroll.saturating_sub(1);
             }
             KeyCode::Down | KeyCode::Char('j') => {
                 self.results_scroll = self.results_scroll.saturating_add(1);
             }
-            KeyCode::PageUp | KeyCode::Char('K') => {
+
+            // 10 line scrolling
+            KeyCode::Char('K') => {
                 self.results_scroll = self.results_scroll.saturating_sub(10);
             }
-            KeyCode::PageDown | KeyCode::Char('J') => {
+            KeyCode::Char('J') => {
                 self.results_scroll = self.results_scroll.saturating_add(10);
             }
-            KeyCode::Home => {
+
+            // Jump to top
+            KeyCode::Home | KeyCode::Char('g') => {
                 self.results_scroll = 0;
             }
+
+            // Jump to bottom
+            KeyCode::Char('G') => {
+                self.results_scroll = self.max_scroll();
+            }
+
+            // Half page scrolling up
+            KeyCode::PageUp => {
+                let half_page = self.results_viewport_height / 2;
+                self.results_scroll = self.results_scroll.saturating_sub(half_page);
+            }
+            KeyCode::Char('u') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                let half_page = self.results_viewport_height / 2;
+                self.results_scroll = self.results_scroll.saturating_sub(half_page);
+            }
+
+            // Half page scrolling down
+            KeyCode::PageDown => {
+                let half_page = self.results_viewport_height / 2;
+                self.results_scroll = self.results_scroll.saturating_add(half_page);
+            }
+            KeyCode::Char('d') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                let half_page = self.results_viewport_height / 2;
+                self.results_scroll = self.results_scroll.saturating_add(half_page);
+            }
+
             _ => {
                 // Ignore other keys in Results pane
             }

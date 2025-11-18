@@ -56,7 +56,10 @@ impl App {
     }
 
     /// Render the results pane (top)
-    fn render_results_pane(&self, frame: &mut Frame, area: ratatui::layout::Rect) {
+    fn render_results_pane(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
+        // Store viewport height for page scrolling calculations (subtract borders)
+        self.results_viewport_height = area.height.saturating_sub(2);
+
         // Set border color based on focus
         let border_color = if self.focus == Focus::ResultsPane {
             Color::Cyan // Focused
@@ -97,14 +100,7 @@ impl App {
 
     /// Render the help line (bottom)
     fn render_help_line(&self, frame: &mut Frame, area: ratatui::layout::Rect) {
-        let help_text = match self.focus {
-            Focus::InputField => {
-                " Tab: Focus Results | Enter/Shift+Enter: Exit with results/query | q: Quit"
-            }
-            Focus::ResultsPane => {
-                " Tab: Focus Input | Enter/Shift+Enter: Exit with results/query | ↑↓/jk: Scroll | J/K / PgUp/PgDn: Page | Home: Top | q: Quit"
-            }
-        };
+        let help_text = " Tab: Switch Focus | Enter: Exit with Results | Shift+Enter: Exit with Query | q: Quit";
 
         let help = Paragraph::new(help_text)
             .style(Style::default().fg(Color::DarkGray));
