@@ -22,7 +22,6 @@ pub enum OutputMode {
 
 /// Application state
 pub struct App {
-    pub json_input: String,
     pub textarea: TextArea<'static>,
     pub executor: JqExecutor,
     pub query_result: Result<String, String>,
@@ -56,7 +55,6 @@ impl App {
         let query_result = executor.execute(".");
 
         Self {
-            json_input,
             textarea,
             executor,
             query_result,

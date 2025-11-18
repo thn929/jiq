@@ -12,21 +12,26 @@ use super::state::{App, Focus};
 impl App {
     /// Render the UI
     pub fn render(&mut self, frame: &mut Frame) {
-        // Split the terminal into two panes: results (top) and input (bottom)
+        // Split the terminal into three areas: results, input, and help
         let layout = Layout::vertical([
             Constraint::Min(3),      // Results pane takes most of the space
             Constraint::Length(3),   // Input field is fixed 3 lines
+            Constraint::Length(1),   // Help line at bottom
         ])
         .split(frame.area());
 
         let results_area = layout[0];
         let input_area = layout[1];
+        let help_area = layout[2];
 
         // Render results pane
         self.render_results_pane(frame, results_area);
 
         // Render input field
         self.render_input_field(frame, input_area);
+
+        // Render help line
+        self.render_help_line(frame, help_area);
     }
 
     /// Render the input field (bottom)
@@ -88,5 +93,22 @@ impl App {
         };
 
         frame.render_widget(content, area);
+    }
+
+    /// Render the help line (bottom)
+    fn render_help_line(&self, frame: &mut Frame, area: ratatui::layout::Rect) {
+        let help_text = match self.focus {
+            Focus::InputField => {
+                " Tab: Focus Results | Enter/Shift+Enter: Exit with results/query | q: Quit"
+            }
+            Focus::ResultsPane => {
+                " Tab: Focus Input | Enter/Shift+Enter: Exit with results/query | ↑↓/jk: Scroll | J/K / PgUp/PgDn: Page | Home: Top | q: Quit"
+            }
+        };
+
+        let help = Paragraph::new(help_text)
+            .style(Style::default().fg(Color::DarkGray));
+
+        frame.render_widget(help, area);
     }
 }
