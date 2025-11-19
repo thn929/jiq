@@ -16,13 +16,35 @@
 ### Requirements
 - **jq** - JSON processor ([installation guide](https://jqlang.org/download/))
 
-### From Source
+### Install via Script (macOS/Linux)
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/bellicose100xp/jiq/releases/latest/download/jiq-installer.sh | sh
+```
+
+### Install via Homebrew (macOS)
+```bash
+brew install bellicose100xp/tap/jiq
+```
+
+### Install via Cargo
+```bash
+cargo install jiq
+```
+
+### Download Binary
+Download pre-built binaries from [GitHub Releases](https://github.com/bellicose100xp/jiq/releases/latest)
+
+<details>
+<summary>From Source</summary>
+
 ```bash
 git clone https://github.com/bellicose100xp/jiq
 cd jiq
 cargo build --release
 sudo cp target/release/jiq /usr/local/bin/
 ```
+
+</details>
 
 ## Quick Start
 
