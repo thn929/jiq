@@ -1,6 +1,4 @@
-# jiq
-
-> Interactive JSON query tool with real-time filtering and VIM keybindings
+# jiq — Interactive JSON query tool with real-time filtering
 
 ## Features
 
