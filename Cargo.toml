@@ -1,6 +1,6 @@
 [package]
 name = "jiq"
-version = "2.0.1"
+version = "2.0.2"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Interactive JSON query tool with real-time filtering using jq"
@@ -47,3 +47,8 @@ opt-level = 3
 lto = true
 codegen-units = 1
 strip = true
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
