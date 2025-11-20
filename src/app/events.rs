@@ -100,6 +100,12 @@ impl App {
         if content_changed {
             let query = self.textarea.lines()[0].as_ref();
             self.query_result = self.executor.execute(query);
+
+            // Cache successful results
+            if let Ok(result) = &self.query_result {
+                self.last_successful_result = Some(result.clone());
+            }
+
             // Reset scroll when query changes
             self.results_scroll = 0;
         }
@@ -289,6 +295,12 @@ impl App {
     fn execute_query(&mut self) {
         let query = self.textarea.lines()[0].as_ref();
         self.query_result = self.executor.execute(query);
+
+        // Cache successful results
+        if let Ok(result) = &self.query_result {
+            self.last_successful_result = Some(result.clone());
+        }
+
         self.results_scroll = 0;
     }
 

@@ -92,9 +92,6 @@ impl App {
 
     /// Render the results pane (top)
     fn render_results_pane(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
-        // Store viewport height for page scrolling calculations (subtract borders)
-        self.results_viewport_height = area.height.saturating_sub(2);
-
         // Set border color based on focus
         let border_color = if self.focus == Focus::ResultsPane {
             Color::Cyan // Focused
@@ -102,14 +99,16 @@ impl App {
             Color::DarkGray // Unfocused
         };
 
-        let block = Block::default()
-            .borders(Borders::ALL)
-            .title(" Results ")
-            .border_style(Style::default().fg(border_color));
-
-        // Display query results or error message
-        let content = match &self.query_result {
+        match &self.query_result {
             Ok(result) => {
+                // Store viewport height for page scrolling calculations (subtract borders)
+                self.results_viewport_height = area.height.saturating_sub(2);
+
+                let block = Block::default()
+                    .borders(Borders::ALL)
+                    .title(" Results ")
+                    .border_style(Style::default().fg(border_color));
+
                 // Parse jq's ANSI color codes into Ratatui Text
                 let colored_text = result
                     .as_bytes()
@@ -117,20 +116,79 @@ impl App {
                     .into_text()
                     .unwrap_or_else(|_| Text::raw(result)); // Fallback to plain text on parse error
 
-                Paragraph::new(colored_text)
+                let content = Paragraph::new(colored_text)
                     .block(block)
-                    .scroll((self.results_scroll, 0))
+                    .scroll((self.results_scroll, 0));
+
+                frame.render_widget(content, area);
             }
             Err(error) => {
-                // Use red color for error messages
-                Paragraph::new(error.as_str())
-                    .block(block)
-                    .style(Style::default().fg(Color::Red))
-                    .scroll((self.results_scroll, 0))
-            }
-        };
+                // Split the area: error at top, last successful result below
+                if let Some(last_result) = &self.last_successful_result {
+                    // Calculate error height (number of lines + borders)
+                    let error_lines = error.lines().count() as u16;
+                    let error_height = (error_lines + 2).min(area.height / 3); // Max 1/3 of space
 
-        frame.render_widget(content, area);
+                    let split_layout = Layout::vertical([
+                        Constraint::Length(error_height),
+                        Constraint::Min(0),
+                    ])
+                    .split(area);
+
+                    let error_area = split_layout[0];
+                    let results_area = split_layout[1];
+
+                    // Store viewport height for the results section (subtract borders)
+                    self.results_viewport_height = results_area.height.saturating_sub(2);
+
+                    // Render error section
+                    let error_block = Block::default()
+                        .borders(Borders::ALL)
+                        .title(" Error ")
+                        .border_style(Style::default().fg(Color::Red));
+
+                    let error_widget = Paragraph::new(error.as_str())
+                        .block(error_block)
+                        .style(Style::default().fg(Color::Red));
+
+                    frame.render_widget(error_widget, error_area);
+
+                    // Render last successful result section
+                    let results_block = Block::default()
+                        .borders(Borders::ALL)
+                        .title(" Results (last valid query) ")
+                        .border_style(Style::default().fg(border_color));
+
+                    // Parse cached result with colors
+                    let colored_text = last_result
+                        .as_bytes()
+                        .to_vec()
+                        .into_text()
+                        .unwrap_or_else(|_| Text::raw(last_result));
+
+                    let results_widget = Paragraph::new(colored_text)
+                        .block(results_block)
+                        .scroll((self.results_scroll, 0));
+
+                    frame.render_widget(results_widget, results_area);
+                } else {
+                    // No cached result, just show error (fallback to original behavior)
+                    self.results_viewport_height = area.height.saturating_sub(2);
+
+                    let block = Block::default()
+                        .borders(Borders::ALL)
+                        .title(" Error ")
+                        .border_style(Style::default().fg(Color::Red));
+
+                    let content = Paragraph::new(error.as_str())
+                        .block(block)
+                        .style(Style::default().fg(Color::Red))
+                        .scroll((self.results_scroll, 0));
+
+                    frame.render_widget(content, area);
+                }
+            }
+        }
     }
 
     /// Render the help line (bottom)

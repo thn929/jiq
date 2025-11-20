@@ -26,6 +26,7 @@ pub struct App {
     pub textarea: TextArea<'static>,
     pub executor: JqExecutor,
     pub query_result: Result<String, String>,
+    pub last_successful_result: Option<String>,
     pub focus: Focus,
     pub editor_mode: EditorMode,
     pub results_scroll: u16,
@@ -57,10 +58,14 @@ impl App {
         // Initial result text on startup
         let query_result = executor.execute(".");
 
+        // Cache the initial successful result
+        let last_successful_result = query_result.as_ref().ok().cloned();
+
         Self {
             textarea,
             executor,
             query_result,
+            last_successful_result,
             focus: Focus::InputField, // Start with input field focused
             editor_mode: EditorMode::default(), // Start in Insert mode
             results_scroll: 0,
