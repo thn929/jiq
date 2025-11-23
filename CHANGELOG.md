@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2025-11-22
+
+### Added
+- Syntax highlighting for jq query input (experimental)
+- Color-coded jq keywords, operators, and functions in the query field
+
+### Fixed
+- Fixed autosuggestion issues in jq query field
+- Fixed all clippy warnings for improved code quality
+
 ## [2.4.0] - 2025-11-22
 
 ### Added

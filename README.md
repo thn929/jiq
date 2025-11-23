@@ -3,9 +3,9 @@
 ## Features
 
 - **Real-time query execution** - See results as you type
-- **Context-aware autocomplete** - Intelligent suggestions for jq functions and JSON fields
+- **Context-aware autocomplete** - Intelligent suggestions for jq functions and JSON fields (experimental)
 - **VIM keybindings** - VIM-style editing for power users
-- **Syntax highlighting** - Colorized JSON output
+- **Syntax highlighting** - Colorized JSON output and jq query syntax (experimental)
 - **Flexible output** - Export results or query string
 
 ## Installation
@@ -178,9 +178,7 @@ echo $QUERY | xargs -I {} jq {} mydata.json
 ## Tips
 
 - Empty query shows original JSON (identity filter `.`)
-- Autocomplete suggests jq functions, JSON fields, operators, and patterns as you type
 - Invalid queries display jq errors in red
-- Color-coded modes: Cyan (INSERT), Yellow (NORMAL), Green (OPERATOR)
 - Results auto-scroll to top when query changes
 
 ## License
