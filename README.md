@@ -3,7 +3,8 @@
 ## Features
 
 - **Real-time query execution** - See results as you type
-- **Context-aware autocomplete** - Intelligent suggestions for jq functions and JSON fields (experimental)
+- **Context-aware autocomplete** - Intelligent suggestions with JSON type information for fields and functions
+- **Floating error overlay** - Syntax errors appear in a non-disruptive overlay (Ctrl+E to toggle)
 - **VIM keybindings** - VIM-style editing for power users
 - **Syntax highlighting** - Colorized JSON output and jq query syntax (experimental)
 - **Flexible output** - Export results or query string
@@ -77,6 +78,7 @@ curl https://api.example.com/data | jiq
 | Key | Action |
 |-----|--------|
 | `Shift+Tab` | Switch focus between Input and Results |
+| `Ctrl+E` | Toggle error overlay (when syntax error exists) |
 | `Enter` | Exit and output filtered JSON |
 | `Shift+Enter` | Exit and output query string only |
 | `q` / `Ctrl+C` | Quit without output |

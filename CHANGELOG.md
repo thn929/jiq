@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.1] - 2025-11-23
+
+### Added
+- JSON type information in autocomplete suggestions (String, Number, Boolean, Array, Object, Null)
+- Array element type detection - shows specific types like Array[String], Array[Object], Array[Number]
+- Nested array type support - displays Array[Array[Number]] for multi-dimensional arrays
+- Floating error overlay with Ctrl+E toggle - errors no longer disrupt results pane layout
+- Error indicator (⚠) in input field title when syntax error exists
+
+### Improved
+- Autocomplete popup now has solid background with better contrast
+- Selected suggestion uses cyan highlight with black text for improved visibility
+- Type labels right-aligned in autocomplete for cleaner appearance
+- Results pane maintains constant height - no more jarring movement when errors occur
+- Error overlay auto-hides when query is modified
+
+### Fixed
+- Fixed popup width calculation to accommodate longer type labels
+- Fixed transparency issue causing JSON text to show through suggestion popup
+- Fixed error overlay not hiding correctly in Insert mode when query changes
+
 ## [2.5.0] - 2025-11-22
 
 ### Added
