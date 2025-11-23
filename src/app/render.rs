@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Constraint, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, List, ListItem, Paragraph},
+    widgets::{Block, Borders, Clear, List, ListItem, Paragraph},
     Frame,
 };
 
@@ -264,8 +264,22 @@ impl App {
         let max_text_width = suggestions
             .iter()
             .map(|s| {
-                let type_label = format!("[{}]", s.suggestion_type);
-                s.text.len() + type_label.len() + TYPE_LABEL_SPACING
+                // Calculate actual type label length including field type if present
+                let type_label_len = match &s.suggestion_type {
+                    SuggestionType::Field => {
+                        if let Some(field_type) = &s.field_type {
+                            // Format: "[field: TypeName]" = "[field: " (8) + TypeName + "]" (1)
+                            9 + field_type.to_string().len()
+                        } else {
+                            7 // "[field]"
+                        }
+                    }
+                    _ => {
+                        // Other types: "[fn]", "[op]", "[pat]"
+                        s.suggestion_type.to_string().len() + 2 // "[]" wrapping
+                    }
+                };
+                s.text.len() + type_label_len + TYPE_LABEL_SPACING
             })
             .max()
             .unwrap_or(20)
@@ -283,6 +297,14 @@ impl App {
             height: popup_height.min(input_area.y), // Don't overflow above input
         };
 
+        // Calculate max field text width for alignment
+        let max_field_width = suggestions
+            .iter()
+            .take(MAX_VISIBLE_SUGGESTIONS)
+            .map(|s| s.text.len())
+            .max()
+            .unwrap_or(0);
+
         // Create list items with styling
         let items: Vec<ListItem> = suggestions
             .iter()
@@ -296,38 +318,61 @@ impl App {
                     SuggestionType::Pattern => Color::Green,
                 };
 
-                let type_label = format!("[{}]", suggestion.suggestion_type);
+                let type_label = match &suggestion.suggestion_type {
+                    SuggestionType::Field => {
+                        if let Some(field_type) = &suggestion.field_type {
+                            format!("[field: {}]", field_type)
+                        } else {
+                            format!("[{}]", suggestion.suggestion_type)
+                        }
+                    }
+                    _ => format!("[{}]", suggestion.suggestion_type),
+                };
+
+                // Calculate padding to align type labels
+                let padding_needed = max_field_width.saturating_sub(suggestion.text.len());
+                let padding = " ".repeat(padding_needed);
 
                 let line = if i == self.autocomplete.selected_index() {
-                    // Highlight selected item
+                    // Highlight selected item with high contrast colors
                     Line::from(vec![
                         Span::styled(
-                            format!("► {} ", suggestion.text),
+                            format!("► {} {}", suggestion.text, padding),
                             Style::default()
-                                .fg(Color::White)
-                                .add_modifier(Modifier::BOLD)
-                                .add_modifier(Modifier::REVERSED),
+                                .fg(Color::Black)
+                                .bg(Color::Cyan)
+                                .add_modifier(Modifier::BOLD),
                         ),
                         Span::styled(
-                            type_label,
+                            format!(" {}", type_label),
                             Style::default()
-                                .fg(type_color)
-                                .add_modifier(Modifier::REVERSED),
+                                .fg(Color::Black)
+                                .bg(Color::Cyan),
                         ),
                     ])
                 } else {
                     Line::from(vec![
                         Span::styled(
-                            format!("  {} ", suggestion.text),
-                            Style::default().fg(Color::White),
+                            format!("  {} {}", suggestion.text, padding),
+                            Style::default()
+                                .fg(Color::White)
+                                .bg(Color::Black),
                         ),
-                        Span::styled(type_label, Style::default().fg(type_color)),
+                        Span::styled(
+                            format!(" {}", type_label),
+                            Style::default()
+                                .fg(type_color)
+                                .bg(Color::Black),
+                        ),
                     ])
                 };
 
                 ListItem::new(line)
             })
             .collect();
+
+        // Clear the background area to prevent transparency
+        frame.render_widget(Clear, popup_area);
 
         // Create the list widget
         let list = List::new(items).block(

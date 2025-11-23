@@ -24,6 +24,39 @@ impl fmt::Display for SuggestionType {
     }
 }
 
+/// JSON field type for providing type information in suggestions
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JsonFieldType {
+    /// String value
+    String,
+    /// Numeric value (integer or float)
+    Number,
+    /// Boolean value (true/false)
+    Boolean,
+    /// Null value
+    Null,
+    /// Object (nested fields)
+    Object,
+    /// Array (list of values) - unknown element type
+    Array,
+    /// Array with known element type (based on first element)
+    ArrayOf(Box<JsonFieldType>),
+}
+
+impl fmt::Display for JsonFieldType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            JsonFieldType::String => write!(f, "String"),
+            JsonFieldType::Number => write!(f, "Number"),
+            JsonFieldType::Boolean => write!(f, "Boolean"),
+            JsonFieldType::Null => write!(f, "Null"),
+            JsonFieldType::Object => write!(f, "Object"),
+            JsonFieldType::Array => write!(f, "Array"),
+            JsonFieldType::ArrayOf(inner) => write!(f, "Array[{}]", inner),
+        }
+    }
+}
+
 /// A single autocomplete suggestion
 #[derive(Debug, Clone)]
 pub struct Suggestion {
@@ -33,6 +66,8 @@ pub struct Suggestion {
     pub suggestion_type: SuggestionType,
     /// Optional description/help text
     pub description: Option<String>,
+    /// Optional JSON field type (for Field suggestions)
+    pub field_type: Option<JsonFieldType>,
 }
 
 impl Suggestion {
@@ -41,6 +76,20 @@ impl Suggestion {
             text: text.into(),
             suggestion_type,
             description: None,
+            field_type: None,
+        }
+    }
+
+    pub fn new_with_type(
+        text: impl Into<String>,
+        suggestion_type: SuggestionType,
+        field_type: Option<JsonFieldType>,
+    ) -> Self {
+        Self {
+            text: text.into(),
+            suggestion_type,
+            description: None,
+            field_type,
         }
     }
 
