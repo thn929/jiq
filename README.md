@@ -10,7 +10,6 @@
 - **Flexible output** - Export results or query string
 
 ## Demo
-[![Watch the video](https://img.youtube.com/vi/mTeEUXeQcAc/maxresdefault.jpg)](https://www.youtube.com/watch?v=mTeEUXeQcAc)
 ![](https://raw.githubusercontent.com/bellicose100xp/assets/refs/heads/main/jiq/jiq-demo-1280.gif)
 
 ## Installation
