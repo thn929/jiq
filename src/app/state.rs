@@ -109,17 +109,28 @@ impl App {
     }
 
     /// Get the total number of lines in the current results
-    pub fn results_line_count(&self) -> u16 {
+    /// Note: Returns u32 to handle large files (>65K lines) correctly
+    /// When there's an error, uses last_successful_result since that's what gets rendered
+    fn results_line_count_u32(&self) -> u32 {
         match &self.query_result {
-            Ok(result) => result.lines().count() as u16,
-            Err(error) => error.lines().count() as u16,
+            Ok(result) => result.lines().count() as u32,
+            Err(_) => {
+                // When there's an error, we render last_successful_result, so count its lines
+                self.last_successful_result
+                    .as_ref()
+                    .map(|r| r.lines().count() as u32)
+                    .unwrap_or(0)
+            }
         }
     }
 
     /// Get the maximum scroll position based on content and viewport
+    /// Note: Uses u32 internally to handle large files correctly, then clamps to u16
+    /// (ratatui's scroll() takes u16, so this is the maximum we can scroll)
     pub fn max_scroll(&self) -> u16 {
-        let total_lines = self.results_line_count();
-        total_lines.saturating_sub(self.results_viewport_height)
+        let total_lines = self.results_line_count_u32();
+        let viewport = self.results_viewport_height as u32;
+        total_lines.saturating_sub(viewport).min(u16::MAX as u32) as u16
     }
 
     /// Update autocomplete suggestions based on current query and cursor position
@@ -348,5 +359,80 @@ mod tests {
         assert!(result.contains("1"));
         assert!(result.contains("2"));
         assert!(result.contains("3"));
+    }
+
+    // Tests for large file handling (>65K lines)
+    #[test]
+    fn test_max_scroll_large_content() {
+        let json = r#"{"test": true}"#;
+        let mut app = App::new(json.to_string());
+
+        // Simulate large content result
+        let large_result: String = (0..70000).map(|i| format!("line {}\n", i)).collect();
+        app.query_result = Ok(large_result);
+        app.results_viewport_height = 20;
+
+        // Should handle >65K lines without overflow
+        let line_count = app.results_line_count_u32();
+        assert!(line_count > 65535);
+
+        // max_scroll should be clamped to u16::MAX
+        let max_scroll = app.max_scroll();
+        assert_eq!(max_scroll, u16::MAX);
+    }
+
+    #[test]
+    fn test_results_line_count_large_file() {
+        let json = r#"{"test": true}"#;
+        let mut app = App::new(json.to_string());
+
+        // Simulate result with exactly u16::MAX lines
+        let result: String = (0..65535).map(|_| "x\n").collect();
+        app.query_result = Ok(result);
+
+        // Verify line count is correct (using internal method)
+        assert_eq!(app.results_line_count_u32(), 65535);
+
+        // Verify max_scroll handles it correctly
+        app.results_viewport_height = 10;
+        assert_eq!(app.max_scroll(), 65525); // 65535 - 10
+    }
+
+    #[test]
+    fn test_line_count_uses_last_result_on_error() {
+        let json = r#"{"test": true}"#;
+        let mut app = App::new(json.to_string());
+
+        // Execute a valid query first to cache result
+        let valid_result: String = (0..50).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(valid_result.clone());
+        app.last_successful_result = Some(valid_result);
+
+        // Verify line count with valid result
+        assert_eq!(app.results_line_count_u32(), 50);
+
+        // Now simulate an error (short error message)
+        app.query_result = Err("syntax error\nline 2\nline 3".to_string());
+
+        // Line count should use last_successful_result (50 lines), not error (3 lines)
+        assert_eq!(app.results_line_count_u32(), 50);
+
+        // Verify max_scroll is calculated correctly with viewport
+        app.results_viewport_height = 10;
+        assert_eq!(app.max_scroll(), 40); // 50 - 10 = 40
+    }
+
+    #[test]
+    fn test_line_count_with_error_no_cached_result() {
+        let json = r#"{"test": true}"#;
+        let mut app = App::new(json.to_string());
+
+        // Set error without any cached result
+        app.last_successful_result = None;
+        app.query_result = Err("error message".to_string());
+
+        // Should return 0 when no cached result available
+        assert_eq!(app.results_line_count_u32(), 0);
+        assert_eq!(app.max_scroll(), 0);
     }
 }

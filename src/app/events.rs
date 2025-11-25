@@ -76,10 +76,12 @@ impl App {
             return true;
         }
 
-        // q (without Ctrl): Exit application without output (not in insert mode)
+        // q (without Ctrl): Exit application without output
+        // - In Normal/Operator mode: always quit (VIM behavior)
+        // - In Insert mode: only quit if focus is on ResultsPane (not editing text)
         if key.code == KeyCode::Char('q')
             && !key.modifiers.contains(KeyModifiers::CONTROL)
-            && self.editor_mode != EditorMode::Insert
+            && (self.editor_mode != EditorMode::Insert || self.focus == Focus::ResultsPane)
         {
             self.should_quit = true;
             return true;
@@ -496,13 +498,14 @@ impl App {
 
     /// Handle keys when Results pane is focused
     fn handle_results_pane_key(&mut self, key: KeyEvent) {
+        let max_scroll = self.max_scroll();
         match key.code {
             // Basic line scrolling (1 line)
             KeyCode::Up | KeyCode::Char('k') => {
                 self.results_scroll = self.results_scroll.saturating_sub(1);
             }
             KeyCode::Down | KeyCode::Char('j') => {
-                self.results_scroll = self.results_scroll.saturating_add(1);
+                self.results_scroll = self.results_scroll.saturating_add(1).min(max_scroll);
             }
 
             // 10 line scrolling
@@ -510,7 +513,7 @@ impl App {
                 self.results_scroll = self.results_scroll.saturating_sub(10);
             }
             KeyCode::Char('J') => {
-                self.results_scroll = self.results_scroll.saturating_add(10);
+                self.results_scroll = self.results_scroll.saturating_add(10).min(max_scroll);
             }
 
             // Jump to top
@@ -520,7 +523,7 @@ impl App {
 
             // Jump to bottom
             KeyCode::Char('G') => {
-                self.results_scroll = self.max_scroll();
+                self.results_scroll = max_scroll;
             }
 
             // Half page scrolling up
@@ -536,11 +539,11 @@ impl App {
             // Half page scrolling down
             KeyCode::PageDown => {
                 let half_page = self.results_viewport_height / 2;
-                self.results_scroll = self.results_scroll.saturating_add(half_page);
+                self.results_scroll = self.results_scroll.saturating_add(half_page).min(max_scroll);
             }
             KeyCode::Char('d') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                 let half_page = self.results_viewport_height / 2;
-                self.results_scroll = self.results_scroll.saturating_add(half_page);
+                self.results_scroll = self.results_scroll.saturating_add(half_page).min(max_scroll);
             }
 
             _ => {
@@ -1304,9 +1307,15 @@ mod tests {
         let mut app = app_with_query(".");
         app.focus = Focus::ResultsPane;
         app.results_scroll = 5;
+        app.results_viewport_height = 10;
+
+        // Set up content with 30 lines so max_scroll = 30 - 10 = 20
+        let content: String = (0..30).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
 
         app.handle_key_event(key(KeyCode::Char('J')));
 
+        // Should scroll from 5 to 15 (10 lines down, within max_scroll of 20)
         assert_eq!(app.results_scroll, 15);
     }
 
@@ -1368,9 +1377,13 @@ mod tests {
         app.results_scroll = 0;
         app.results_viewport_height = 20;
 
+        // Set up content with 50 lines so max_scroll = 50 - 20 = 30
+        let content: String = (0..50).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
+
         app.handle_key_event(key(KeyCode::PageDown));
 
-        // Should scroll down by half viewport (10 lines)
+        // Should scroll down by half viewport (10 lines), within max_scroll of 30
         assert_eq!(app.results_scroll, 10);
     }
 
@@ -1393,8 +1406,13 @@ mod tests {
         app.results_scroll = 0;
         app.results_viewport_height = 20;
 
+        // Set up content with 50 lines so max_scroll = 50 - 20 = 30
+        let content: String = (0..50).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
+
         app.handle_key_event(key_with_mods(KeyCode::Char('d'), KeyModifiers::CONTROL));
 
+        // Should scroll down by half viewport (10 lines), within max_scroll of 30
         assert_eq!(app.results_scroll, 10);
     }
 
@@ -1949,5 +1967,164 @@ mod tests {
         // Press backspace - should not crash
         app.handle_key_event(key(KeyCode::Backspace));
         assert_eq!(app.history.search_query(), "");
+    }
+
+    // ========== Scroll clamping tests ==========
+
+    #[test]
+    fn test_scroll_clamped_to_max() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+
+        // Set up a short content with few lines
+        app.query_result = Ok("line1\nline2\nline3".to_string());
+        app.results_viewport_height = 10; // Viewport larger than content
+
+        // max_scroll should be 0 since content fits in viewport
+        assert_eq!(app.max_scroll(), 0);
+
+        // Try to scroll down - should stay at 0
+        app.handle_key_event(key(KeyCode::Char('j')));
+        assert_eq!(app.results_scroll, 0);
+
+        // Try to scroll down multiple times - should stay at 0
+        for _ in 0..100 {
+            app.handle_key_event(key(KeyCode::Char('j')));
+        }
+        assert_eq!(app.results_scroll, 0);
+    }
+
+    #[test]
+    fn test_scroll_clamped_with_content() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+
+        // Set up content with 20 lines
+        let content: String = (0..20).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
+        app.results_viewport_height = 10;
+
+        // max_scroll should be 20 - 10 = 10
+        assert_eq!(app.max_scroll(), 10);
+
+        // Scroll down many times
+        for _ in 0..100 {
+            app.handle_key_event(key(KeyCode::Char('j')));
+        }
+
+        // Should be clamped to max_scroll
+        assert_eq!(app.results_scroll, 10);
+    }
+
+    #[test]
+    fn test_scroll_page_down_clamped() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+
+        // 15 lines content, 10 line viewport
+        let content: String = (0..15).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
+        app.results_viewport_height = 10;
+
+        // max_scroll = 15 - 10 = 5
+        assert_eq!(app.max_scroll(), 5);
+
+        // Page down (half page = 5) should go to max
+        app.handle_key_event(key(KeyCode::PageDown));
+        assert_eq!(app.results_scroll, 5);
+
+        // Another page down should stay at max
+        app.handle_key_event(key(KeyCode::PageDown));
+        assert_eq!(app.results_scroll, 5);
+    }
+
+    #[test]
+    fn test_scroll_j_clamped() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+
+        // 5 lines content, 3 line viewport
+        let content: String = (0..5).map(|i| format!("line{}\n", i)).collect();
+        app.query_result = Ok(content);
+        app.results_viewport_height = 3;
+
+        // max_scroll = 5 - 3 = 2
+        assert_eq!(app.max_scroll(), 2);
+
+        // Big scroll (J = 10 lines) should clamp to max
+        app.handle_key_event(key(KeyCode::Char('J')));
+        assert_eq!(app.results_scroll, 2);
+    }
+
+    // ========== 'q' key behavior tests ==========
+
+    #[test]
+    fn test_q_quits_in_results_pane_insert_mode() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+        app.editor_mode = EditorMode::Insert;
+
+        // 'q' should quit even when editor is in Insert mode
+        // because we're in ResultsPane (not editing text)
+        app.handle_key_event(key(KeyCode::Char('q')));
+
+        assert!(app.should_quit);
+    }
+
+    #[test]
+    fn test_q_does_not_quit_in_input_field_insert_mode() {
+        let mut app = app_with_query("");
+        app.focus = Focus::InputField;
+        app.editor_mode = EditorMode::Insert;
+
+        // 'q' should NOT quit when in InputField with Insert mode
+        // (user is typing)
+        app.handle_key_event(key(KeyCode::Char('q')));
+
+        assert!(!app.should_quit);
+        // The 'q' should be inserted into the query
+        assert!(app.query().contains('q'));
+    }
+
+    #[test]
+    fn test_q_quits_in_input_field_normal_mode() {
+        let mut app = app_with_query("");
+        app.focus = Focus::InputField;
+        app.editor_mode = EditorMode::Normal;
+
+        // 'q' should quit when in Normal mode
+        app.handle_key_event(key(KeyCode::Char('q')));
+
+        assert!(app.should_quit);
+    }
+
+    #[test]
+    fn test_q_quits_in_results_pane_normal_mode() {
+        let mut app = app_with_query("");
+        app.focus = Focus::ResultsPane;
+        app.editor_mode = EditorMode::Normal;
+
+        // 'q' should quit when in ResultsPane Normal mode
+        app.handle_key_event(key(KeyCode::Char('q')));
+
+        assert!(app.should_quit);
+    }
+
+    #[test]
+    fn test_focus_switch_preserves_editor_mode() {
+        let mut app = app_with_query("");
+        app.focus = Focus::InputField;
+        app.editor_mode = EditorMode::Insert;
+
+        // Switch to ResultsPane
+        app.handle_key_event(key(KeyCode::BackTab));
+
+        // Editor mode should still be Insert
+        assert_eq!(app.focus, Focus::ResultsPane);
+        assert_eq!(app.editor_mode, EditorMode::Insert);
+
+        // 'q' should quit in ResultsPane even with Insert mode
+        app.handle_key_event(key(KeyCode::Char('q')));
+        assert!(app.should_quit);
     }
 }
