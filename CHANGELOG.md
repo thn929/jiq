@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0] - 2025-11-25
+
+### Fixed
+- Autocomplete Tab now correctly appends array suggestions instead of replacing entire query
+  - Example: Typing `.services` + accepting `[].name` now correctly produces `.services[].name`
+  - Previously replaced entire query with just `[].name`
+- History now correctly saves successful queries on Enter/Shift+Enter/Alt+Enter
+  - Queries are persisted to `~/.jiq_history` for use in future sessions
+  - Failed queries and empty queries are not saved
+
+### Changed
+- **Major internal refactoring for improved maintainability** (no user-facing changes)
+  - Extracted event handlers into focused modules (vim, global, history, results)
+  - Reduced `events.rs` from 2,469 to 148 lines (94% reduction)
+  - Extracted popup rendering utilities for code reuse
+  - Extracted syntax highlighting and help content into dedicated modules
+  - All tests now colocated with code following Rust best practices
+
+### Added
+- 17 new tests for critical dispatch order and focus interactions
+- Comprehensive regression tests for autocomplete behavior
+- Tests for history persistence logic
+- Total test count increased from 335 to 360 tests
+
+### Internal
+- Created 6 new well-organized modules with clear responsibilities
+- Extracted reusable popup positioning utilities (`widgets/popup.rs`)
+- Help content now maintained in constants file for easier updates
+- Improved code organization with clear module boundaries
+
 ## [2.10.0] - 2025-11-25
 
 ### Added
