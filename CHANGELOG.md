@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2025-11-24
+
+### Added
+- Autocomplete suggestions for root-level JSON arrays
+  - Pressing `.` on `[{"id": 1}, ...]` now suggests `.[]`, `.[].id`, `.[].field`, etc.
+  - Previously showed no suggestions for top-level arrays
+  - Supports prefix filtering (typing `n` filters to `.[].name`, `.[].notes`, etc.)
+  - Handles edge cases: empty arrays, arrays of primitives, nested arrays
+
 ## [2.8.0] - 2025-11-24
 
 ### Added
