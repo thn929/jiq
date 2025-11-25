@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2025-11-24
+
+### Added
+- Persistent query history with fuzzy search
+- `Ctrl+P` / `Ctrl+N` - Quick cycle through previous/next queries
+- `Ctrl+R` - Open full-width fuzzy search popup for history
+- Queries persist across sessions in platform-specific data directories
+- Automatic deduplication of duplicate queries
+- History limited to last 1000 entries
+
 ## [2.6.2] - 2025-11-24
 
 ### Added
