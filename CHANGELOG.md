@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.1] - 2025-11-24
+
+### Fixed
+- History search box now shows a visible cursor with full editing support
+  - Left/right arrow keys move cursor within search text
+  - Insert and delete at any position (not just end)
+- History popup no longer collapses when search has no matches
+- Multi-word search now works correctly (space-separated terms are ANDed, like fzf)
+  - e.g., `headquarters building` matches entries containing both terms
+
 ## [2.9.0] - 2025-11-24
 
 ### Added
