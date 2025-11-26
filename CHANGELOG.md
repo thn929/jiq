@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0] - 2025-11-25
+
+### Added
+- Ctrl+Q keybind to exit with query output (primary method, works in all terminals)
+  - Alternative to Shift+Enter and Alt+Enter which may not work in all terminals
+  - Saves successful queries to history before exiting
+  - Failed queries still exit but are not saved to history
+
+### Fixed
+- Input text now scrolls left to fill space when deleting characters
+  - Previously left empty space on the right when deleting from long queries
+  - Text automatically adjusts to show as much content as possible
+  - Cursor remains visible throughout deletion
+
+### Changed
+- Refactored input rendering architecture to eliminate cursor desynchronization
+  - Replaced overlay rendering with direct styled Paragraph rendering
+  - Use tui-textarea for editing logic only, not for rendering
+  - Simplifies codebase and prevents cursor position bugs
+  - Matches the proven pattern used in results pane rendering
+
+### Internal
+- Added 12 scroll offset and synchronization tests
+- Added 9 unit tests for span extraction and cursor insertion
+- Added 6 comprehensive tests for Ctrl+Q, Shift+Enter, Alt+Enter
+- Replaced 5 redundant tests with proper unit tests
+- All 374 tests passing
+
 ## [2.12.1] - 2025-11-25
 
 ### Added
