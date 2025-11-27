@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.14.1] - 2025-11-27
+
+### Improved
+- Context-aware help text in INPUT mode that adapts to input state
+  - Empty input: Shows history navigation shortcuts (Ctrl+P/N to cycle, ↑/Ctrl+R to open popup)
+  - Has content: Shows exit shortcuts and history popup access
+  - Always visible: Shift+Tab for pane switching, ↑/Ctrl+R for history
+- Up arrow (↑) now always opens history popup, not just when input is empty
+  - More consistent with Ctrl+R behavior
+  - Better discoverability of history features
+
+### Changed
+- Improved terminology in help text for clarity
+  - "Exit with Results" → "Output Result"
+  - "Exit with Query" → "Output Query"
+  - "Switch Focus" → "Switch Pane"
+- Use arrow symbol (↑) for more compact display in help text
+
+### Documentation
+- Updated README to reflect new Up arrow behavior
+
 ## [2.14.0] - 2025-11-27
 
 ### Improved
