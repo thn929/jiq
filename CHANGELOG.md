@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.15.0] - 2025-11-28
+
+### Added
+- Clipboard support with multiple backends
+  - `Ctrl+Y` in Insert mode to copy query
+  - `yy` in Normal mode to copy query
+  - `yy` in Results pane to copy filtered JSON output
+  - Auto-strips ANSI color codes from results before copying
+  - Three clipboard backends configurable via `~/.config/jiq/config.toml`:
+    - `auto` (default): tries system clipboard, falls back to OSC 52
+    - `system`: OS clipboard only (via arboard)
+    - `osc52`: terminal escape sequences (works over SSH/tmux)
+- Notification system for transient UI messages
+  - Info messages (gray, 1.5s) for confirmations like "Copied!"
+  - Warning messages (yellow, 10s) for config errors
+  - Error messages (red, permanent) for critical errors
+  - Notifications display in top-right corner with styled borders
+- Configuration system with TOML support
+  - Config file at `~/.config/jiq/config.toml` (XDG paths on all platforms)
+  - Graceful handling of missing or malformed config files
+  - Comprehensive property-based tests for config parsing
+
+### Documentation
+- Added CONTRIBUTING.md with project standards and guidelines
+- Updated README with clipboard keybindings and configuration
+
 ## [2.14.2] - 2025-11-27
 
 ### Added
