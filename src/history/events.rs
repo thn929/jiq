@@ -59,7 +59,7 @@ fn replace_query_with(app: &mut App, text: &str) {
 mod tests {
     use super::*;
     use crate::app::{App, Focus};
-    use crate::config::ClipboardBackend;
+    use crate::config::Config;
     use crate::editor::EditorMode;
     use crate::history::HistoryState;
     use ratatui::crossterm::event::KeyModifiers;
@@ -67,9 +67,9 @@ mod tests {
     // Test fixture data
     const TEST_JSON: &str = r#"{"name": "test", "age": 30, "city": "NYC"}"#;
 
-    /// Helper to create App with default clipboard backend for tests
+    /// Helper to create App with default config for tests
     fn test_app(json: &str) -> App {
-        App::new(json.to_string(), ClipboardBackend::Auto)
+        App::new(json.to_string(), &Config::default())
     }
 
     // Helper to create a KeyEvent without modifiers

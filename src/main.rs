@@ -134,7 +134,7 @@ fn run(
     json_input: String,
     config_result: config::ConfigResult,
 ) -> Result<App> {
-    let mut app = App::new(json_input, config_result.config.clipboard.backend);
+    let mut app = App::new(json_input, &config_result.config);
 
     // Show config warning if there was one
     if let Some(warning) = config_result.warning {

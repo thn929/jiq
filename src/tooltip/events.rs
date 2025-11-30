@@ -22,7 +22,7 @@ mod tests {
 
     #[test]
     fn test_handle_tooltip_toggle_from_enabled() {
-        let mut state = TooltipState::new();
+        let mut state = TooltipState::new(true);
         assert!(state.enabled);
 
         let handled = handle_tooltip_toggle(&mut state);
@@ -33,8 +33,7 @@ mod tests {
 
     #[test]
     fn test_handle_tooltip_toggle_from_disabled() {
-        let mut state = TooltipState::new();
-        state.toggle(); // disable it first
+        let mut state = TooltipState::new(false);
         assert!(!state.enabled);
 
         let handled = handle_tooltip_toggle(&mut state);
@@ -45,7 +44,7 @@ mod tests {
 
     #[test]
     fn test_handle_tooltip_toggle_preserves_current_function() {
-        let mut state = TooltipState::new();
+        let mut state = TooltipState::new(true);
         state.set_current_function(Some("select".to_string()));
 
         handle_tooltip_toggle(&mut state);

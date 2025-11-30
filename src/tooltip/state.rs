@@ -11,10 +11,14 @@ pub struct TooltipState {
 }
 
 impl TooltipState {
-    /// Create a new TooltipState with tooltip enabled by default
-    pub fn new() -> Self {
+    /// Create a new TooltipState with specified auto_show behavior
+    ///
+    /// # Arguments
+    /// * `auto_show` - If true, tooltip auto-shows when cursor is on a function.
+    ///   If false, tooltip is hidden by default and requires Ctrl+I to show.
+    pub fn new(auto_show: bool) -> Self {
         Self {
-            enabled: true,
+            enabled: auto_show,
             current_function: None,
         }
     }
@@ -38,7 +42,7 @@ impl TooltipState {
 
 impl Default for TooltipState {
     fn default() -> Self {
-        Self::new()
+        Self::new(true)
     }
 }
 
@@ -48,15 +52,28 @@ mod tests {
     use proptest::prelude::*;
 
     #[test]
-    fn test_new_tooltip_state() {
-        let state = TooltipState::new();
+    fn test_new_tooltip_state_with_auto_show_true() {
+        let state = TooltipState::new(true);
         assert!(state.enabled);
         assert!(state.current_function.is_none());
     }
 
     #[test]
+    fn test_new_tooltip_state_with_auto_show_false() {
+        let state = TooltipState::new(false);
+        assert!(!state.enabled);
+        assert!(state.current_function.is_none());
+    }
+
+    #[test]
+    fn test_default_creates_enabled_state() {
+        let state = TooltipState::default();
+        assert!(state.enabled);
+    }
+
+    #[test]
     fn test_toggle() {
-        let mut state = TooltipState::new();
+        let mut state = TooltipState::new(true);
         assert!(state.enabled);
         state.toggle();
         assert!(!state.enabled);
@@ -66,7 +83,7 @@ mod tests {
 
     #[test]
     fn test_set_current_function() {
-        let mut state = TooltipState::new();
+        let mut state = TooltipState::new(true);
         state.set_current_function(Some("select".to_string()));
         assert_eq!(state.current_function, Some("select".to_string()));
         state.set_current_function(None);
@@ -75,7 +92,7 @@ mod tests {
 
     #[test]
     fn test_should_show() {
-        let mut state = TooltipState::new();
+        let mut state = TooltipState::new(true);
         // Enabled but no function
         assert!(!state.should_show());
 
@@ -102,8 +119,7 @@ mod tests {
 
         #[test]
         fn prop_toggle_round_trip(initial_enabled: bool, has_function: bool, function_name in "[a-z_]+") {
-            let mut state = TooltipState::new();
-            state.enabled = initial_enabled;
+            let mut state = TooltipState::new(initial_enabled);
             if has_function {
                 state.set_current_function(Some(function_name.clone()));
             }
@@ -121,8 +137,7 @@ mod tests {
 
         #[test]
         fn prop_toggle_disabled_hides_tooltip(function_name in "[a-z_]+") {
-            let mut state = TooltipState::new();
-            state.enabled = true;
+            let mut state = TooltipState::new(true);
             state.set_current_function(Some(function_name));
 
             // When enabled with function, should_show is true
@@ -138,8 +153,7 @@ mod tests {
 
         #[test]
         fn prop_toggle_enabled_with_function_shows_tooltip(function_name in "[a-z_]+") {
-            let mut state = TooltipState::new();
-            state.enabled = false;
+            let mut state = TooltipState::new(false);
             state.set_current_function(Some(function_name));
 
             // When disabled, should_show is false
@@ -166,8 +180,7 @@ mod tests {
             has_function: bool,
             function_name in "[a-z_]+"
         ) {
-            let mut state = TooltipState::new();
-            state.enabled = enabled;
+            let mut state = TooltipState::new(enabled);
             if has_function {
                 state.set_current_function(Some(function_name));
             } else {

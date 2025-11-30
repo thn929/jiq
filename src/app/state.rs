@@ -2,7 +2,7 @@ use crate::help::HelpPopupState;
 use crate::input::InputState;
 use crate::query::{Debouncer, QueryState};
 use crate::autocomplete::{self, AutocompleteState, insertion};
-use crate::config::ClipboardBackend;
+use crate::config::{ClipboardBackend, Config};
 use crate::history::HistoryState;
 use crate::notification::NotificationState;
 use crate::scroll::ScrollState;
@@ -43,8 +43,12 @@ pub struct App {
 }
 
 impl App {
-    /// Create a new App instance with JSON input and clipboard backend preference
-    pub fn new(json_input: String, clipboard_backend: ClipboardBackend) -> Self {
+    /// Create a new App instance with JSON input and configuration
+    ///
+    /// # Arguments
+    /// * `json_input` - The JSON data to explore
+    /// * `config` - Application configuration
+    pub fn new(json_input: String, config: &Config) -> Self {
         Self {
             input: InputState::new(),
             query: QueryState::new(json_input),
@@ -57,8 +61,8 @@ impl App {
             history: HistoryState::new(),
             help: HelpPopupState::new(),
             notification: NotificationState::new(),
-            clipboard_backend,
-            tooltip: TooltipState::new(),
+            clipboard_backend: config.clipboard.backend,
+            tooltip: TooltipState::new(config.tooltip.auto_show),
             stats: StatsState::default(),
             debouncer: Debouncer::new(),
         }
@@ -140,12 +144,11 @@ impl App {
 mod tests {
     use super::*;
     use crate::query::ResultType;
-    use crate::config::ClipboardBackend;
     use crate::autocomplete::state::{Suggestion, SuggestionType};
 
-    /// Helper to create App with default clipboard backend for tests
+    /// Helper to create App with default config for tests
     fn test_app(json: &str) -> App {
-        App::new(json.to_string(), ClipboardBackend::Auto)
+        App::new(json.to_string(), &Config::default())
     }
 
     /// Helper to create a test suggestion from text (for backward compatibility with existing tests)

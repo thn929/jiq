@@ -183,13 +183,13 @@ impl App {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::ClipboardBackend;
+    use crate::config::Config;
     use crate::history::HistoryState;
     use proptest::prelude::*;
 
-    /// Helper to create App with default clipboard backend for tests
+    /// Helper to create App with default config for tests
     fn test_app(json: &str) -> App {
-        let mut app = App::new(json.to_string(), ClipboardBackend::Auto);
+        let mut app = App::new(json.to_string(), &Config::default());
         // Use empty in-memory history for all tests to prevent disk writes
         app.history = HistoryState::empty();
         app

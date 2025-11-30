@@ -956,7 +956,7 @@ mod snapshot_tests {
     use super::*;
     use super::test_helpers::render_to_string;
     use crate::app::state::App;
-    use crate::config::ClipboardBackend;
+    use crate::config::Config;
     use crate::editor::EditorMode;
     use crate::history::HistoryState;
     use insta::assert_snapshot;
@@ -964,9 +964,9 @@ mod snapshot_tests {
     const TEST_WIDTH: u16 = 80;
     const TEST_HEIGHT: u16 = 24;
 
-    /// Helper to create App with default clipboard backend for tests
+    /// Helper to create App with default config for tests
     fn test_app(json: &str) -> App {
-        App::new(json.to_string(), ClipboardBackend::Auto)
+        App::new(json.to_string(), &Config::default())
     }
 
     // === Basic UI Layout Tests ===

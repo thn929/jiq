@@ -247,7 +247,7 @@ pub fn handle_global_keys(app: &mut App, key: KeyEvent) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::ClipboardBackend;
+    use crate::config::Config;
     use crate::editor::EditorMode;
     use crate::history::HistoryState;
     use tui_textarea::CursorMove;
@@ -261,9 +261,9 @@ mod tests {
         "items": [{"tags": [{"name": "tag1"}]}]
     }"#;
 
-    /// Helper to create App with default clipboard backend for tests
+    /// Helper to create App with default config for tests
     fn test_app(json: &str) -> App {
-        App::new(json.to_string(), ClipboardBackend::Auto)
+        App::new(json.to_string(), &Config::default())
     }
 
     // Helper to create a KeyEvent without modifiers

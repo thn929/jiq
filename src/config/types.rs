@@ -27,12 +27,31 @@ impl Default for ClipboardConfig {
     }
 }
 
+/// Tooltip configuration section
+#[derive(Debug, Clone, Deserialize)]
+pub struct TooltipConfig {
+    #[serde(default = "default_auto_show")]
+    pub auto_show: bool,
+}
+
+fn default_auto_show() -> bool {
+    true
+}
+
+impl Default for TooltipConfig {
+    fn default() -> Self {
+        TooltipConfig { auto_show: true }
+    }
+}
+
 /// Root configuration structure
 #[derive(Debug, Clone, Deserialize)]
 #[derive(Default)]
 pub struct Config {
     #[serde(default)]
     pub clipboard: ClipboardConfig,
+    #[serde(default)]
+    pub tooltip: TooltipConfig,
 }
 
 
@@ -116,5 +135,111 @@ backend = "system"
                 );
             }
         }
+    }
+
+    // Feature: tooltip-config, Property 1: Valid auto_show parsing
+    // For any valid boolean value in tooltip.auto_show, parsing should succeed.
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_valid_tooltip_auto_show_parsing(auto_show: bool) {
+            let toml_content = format!(r#"
+[tooltip]
+auto_show = {}
+"#, auto_show);
+
+            let config: Result<Config, _> = toml::from_str(&toml_content);
+
+            prop_assert!(config.is_ok(), "Failed to parse valid auto_show: {}", auto_show);
+
+            let config = config.unwrap();
+            prop_assert_eq!(config.tooltip.auto_show, auto_show);
+        }
+    }
+
+    // Feature: tooltip-config, Property 2: Missing tooltip section defaults to auto_show = true
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_missing_tooltip_section_defaults(
+            include_tooltip_section in prop::bool::ANY,
+            include_auto_show_field in prop::bool::ANY
+        ) {
+            let toml_content = if !include_tooltip_section {
+                // No tooltip section
+                String::new()
+            } else if !include_auto_show_field {
+                // Tooltip section exists but auto_show field is missing
+                "[tooltip]\n".to_string()
+            } else {
+                // Both section and field exist with false value
+                r#"
+[tooltip]
+auto_show = false
+"#.to_string()
+            };
+
+            let config: Result<Config, _> = toml::from_str(&toml_content);
+
+            prop_assert!(config.is_ok(), "Failed to parse config with missing tooltip fields");
+
+            let config = config.unwrap();
+
+            // When fields are missing, should default to true
+            if !include_tooltip_section || !include_auto_show_field {
+                prop_assert!(
+                    config.tooltip.auto_show,
+                    "Missing tooltip.auto_show should default to true"
+                );
+            }
+        }
+    }
+
+    // Unit tests for tooltip config
+    #[test]
+    fn test_tooltip_config_default() {
+        let config = TooltipConfig::default();
+        assert!(config.auto_show);
+    }
+
+    #[test]
+    fn test_parse_tooltip_auto_show_true() {
+        let toml = r#"
+[tooltip]
+auto_show = true
+"#;
+        let config: Config = toml::from_str(toml).unwrap();
+        assert!(config.tooltip.auto_show);
+    }
+
+    #[test]
+    fn test_parse_tooltip_auto_show_false() {
+        let toml = r#"
+[tooltip]
+auto_show = false
+"#;
+        let config: Config = toml::from_str(toml).unwrap();
+        assert!(!config.tooltip.auto_show);
+    }
+
+    #[test]
+    fn test_missing_tooltip_section_uses_default() {
+        let toml = r#"
+[clipboard]
+backend = "auto"
+"#;
+        let config: Config = toml::from_str(toml).unwrap();
+        assert!(config.tooltip.auto_show);
+    }
+
+    #[test]
+    fn test_empty_tooltip_section_uses_default() {
+        let toml = r#"
+[tooltip]
+"#;
+        let config: Config = toml::from_str(toml).unwrap();
+        assert!(config.tooltip.auto_show);
     }
 }
