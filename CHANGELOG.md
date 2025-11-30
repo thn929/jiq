@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.19.3] - 2025-11-30
+
+### Added
+- Configuration option to control tooltip auto-show behavior
+  - New `[tooltip]` section in config with `auto_show` field (defaults to `true`)
+  - Set to `false` to hide tooltip by default, requiring Ctrl+I to show manually
+
+### Changed
+- Refactored `App::new()` to accept `&Config` for better extensibility
+
 ## [2.19.2] - 2025-11-30
 
 ### Fixed
