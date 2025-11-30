@@ -3,7 +3,6 @@
 ## Features
 
 - **Real-time query execution** - See results as you type
-- **Stats bar** - Shows result type and count (e.g., "Array [5 objects]", "Stream [3 values]")
 - **[EXPERIMENTAL] Context-aware autocomplete** - Intelligent suggestions with JSON type information for fields and functions
 - **Function tooltip** - Quick reference help for jq functions with examples
 - **Query history** - Searchable history of successful queries
@@ -11,6 +10,7 @@
 - **Floating error overlay** - Syntax errors appear in a non-disruptive overlay
 - **VIM keybindings** - VIM-style editing for power users
 - **[EXPERIMENTAL] Syntax highlighting** - Colorized JSON output and jq query syntax (experimental)
+- **Stats bar** - Shows result type and count (e.g., "Array [5 objects]", "Stream [3 values]")
 - **Flexible output** - Export results or query string
 
 ## Demo
