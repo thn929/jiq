@@ -4,9 +4,10 @@
 
 - **Real-time query execution** - See results as you type
 - **[EXPERIMENTAL] Context-aware autocomplete** - Intelligent suggestions with JSON type information for fields and functions
+- **Function tooltip** - Quick reference help for jq functions with examples
 - **Query history** - Searchable history of successful queries
 - **Clipboard support** - Copy query or results to clipboard (also supports OSC 52 for remote terminals)
-- **Floating error overlay** - Syntax errors appear in a non-disruptive overlay (Ctrl+E to toggle)
+- **Floating error overlay** - Syntax errors appear in a non-disruptive overlay
 - **VIM keybindings** - VIM-style editing for power users
 - **[EXPERIMENTAL] Syntax highlighting** - Colorized JSON output and jq query syntax (experimental)
 - **Flexible output** - Export results or query string
@@ -83,6 +84,7 @@ curl https://api.example.com/data | jiq
 | `Shift+Tab` | Switch focus between Input and Results |
 | `Ctrl+Y` | Copy current query or results to clipboard |
 | `yy` | Copy current query or results to clipboard (NORMAL mode) |
+| `Ctrl+T` | Toggle function tooltip (when cursor is on a function) |
 | `Ctrl+E` | Toggle error overlay (when syntax error exists) |
 | `Enter` | Exit and output filtered JSON |
 | `Ctrl+Q` | Exit and output query string only (`Shift+Enter` may also work in some modern terminal emulators) |
