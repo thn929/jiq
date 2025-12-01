@@ -17,7 +17,7 @@ expression: output
 "│                                                                                                                      │"
 "│                                                                                                                      │"
 "│                                                                                                                      │"
-"│                                                              ┌ sort_by ───────────────────────── Ctrl+T to dismiss ┐ │"
+"│                                                              ┌ fn: sort_by ───────────────────── Ctrl+T to dismiss ┐ │"
 "│                                                              │Sort array elements by a computed value              │ │"
 "│                                                              │                                                     │ │"
 "│                                                              │  sort_by(.name)             │ sort by field         │ │"

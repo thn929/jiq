@@ -18,7 +18,7 @@ expression: output
 "│                                                                                                                      │"
 "│                                                                                                                      │"
 "│                                                                                                                      │"
-"│                                                       ┌ select ───────────────────────────────── Ctrl+T to dismiss ┐ │"
+"│                                                       ┌ fn: select ───────────────────────────── Ctrl+T to dismiss ┐ │"
 "│                                                       │Filter elements that match a condition                      │ │"
 "│                                                       │                                                            │ │"
 "│                                                       │  select(.age > 18)                       │ numeric filter  │ │"

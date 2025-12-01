@@ -8,6 +8,8 @@ pub struct TooltipState {
     pub enabled: bool,
     /// Currently detected function name (if any)
     pub current_function: Option<String>,
+    /// Currently detected operator (if any)
+    pub current_operator: Option<String>,
 }
 
 impl TooltipState {
@@ -20,6 +22,7 @@ impl TooltipState {
         Self {
             enabled: auto_show,
             current_function: None,
+            current_operator: None,
         }
     }
 
@@ -33,10 +36,15 @@ impl TooltipState {
         self.current_function = func;
     }
 
+    /// Set the current operator detected at cursor position
+    pub fn set_current_operator(&mut self, op: Option<String>) {
+        self.current_operator = op;
+    }
+
     /// Check if tooltip should be shown
-    /// Returns true only when enabled AND a function is detected
+    /// Returns true only when enabled AND (a function OR operator is detected)
     pub fn should_show(&self) -> bool {
-        self.enabled && self.current_function.is_some()
+        self.enabled && (self.current_function.is_some() || self.current_operator.is_some())
     }
 }
 
@@ -106,6 +114,61 @@ mod tests {
 
         // Disabled without function
         state.set_current_function(None);
+        assert!(!state.should_show());
+    }
+
+    #[test]
+    fn test_new_tooltip_state_has_no_operator() {
+        let state = TooltipState::new(true);
+        assert!(state.current_operator.is_none());
+    }
+
+    #[test]
+    fn test_set_current_operator() {
+        let mut state = TooltipState::new(true);
+        state.set_current_operator(Some("//".to_string()));
+        assert_eq!(state.current_operator, Some("//".to_string()));
+        state.set_current_operator(None);
+        assert!(state.current_operator.is_none());
+    }
+
+    #[test]
+    fn test_should_show_with_operator() {
+        let mut state = TooltipState::new(true);
+        // Enabled but no function or operator
+        assert!(!state.should_show());
+
+        // Enabled with operator
+        state.set_current_operator(Some("//".to_string()));
+        assert!(state.should_show());
+
+        // Disabled with operator
+        state.toggle();
+        assert!(!state.should_show());
+
+        // Disabled without operator
+        state.set_current_operator(None);
+        assert!(!state.should_show());
+    }
+
+    #[test]
+    fn test_should_show_with_function_or_operator() {
+        let mut state = TooltipState::new(true);
+
+        // Only function set
+        state.set_current_function(Some("map".to_string()));
+        assert!(state.should_show());
+
+        // Both function and operator set
+        state.set_current_operator(Some("//".to_string()));
+        assert!(state.should_show());
+
+        // Only operator set
+        state.set_current_function(None);
+        assert!(state.should_show());
+
+        // Neither set
+        state.set_current_operator(None);
         assert!(!state.should_show());
     }
 

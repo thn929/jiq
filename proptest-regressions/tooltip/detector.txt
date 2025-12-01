@@ -5,3 +5,4 @@
 # It is recommended to check this file in to source control so that
 # everyone who runs the test benefits from these saved cases.
 cc 9767abc038e24f3bbde8b235dc694b3c11e401807e718f355fe693295ce1ae64 # shrinks to func_index = 0, prefix = "", suffix = "a", cursor_offset = 0
+cc 2aad7530fd9591fb1cdf26232c4cc408c2b2f821015235f96bedd957e5b186f8 # shrinks to op_index = 3, prefix = ".", suffix = "", cursor_offset = 0

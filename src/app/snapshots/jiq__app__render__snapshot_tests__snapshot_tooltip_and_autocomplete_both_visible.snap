@@ -17,7 +17,7 @@ expression: output
 "│                                                                                                                      │"
 "│                                                                                                                      │"
 "│                                                                                                                      │"
-"│                                                                 ┌ map ────────────────────────── Ctrl+T to dismiss ┐ │"
+"│                                                                 ┌ fn: map ────────────────────── Ctrl+T to dismiss ┐ │"
 "│                                                                 │Apply expression to each element of an array      │ │"
 "│                                                                 │                                                  │ │"
 "│                                                                 │  map(.name)           │ extract field from each  │ │"

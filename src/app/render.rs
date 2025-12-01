@@ -518,6 +518,34 @@ mod snapshot_tests {
         assert_snapshot!(output);
     }
 
+    #[test]
+    fn snapshot_tooltip_operator_alternative() {
+        // Test operator tooltip for // (alternative operator)
+        let json = r#"{"name": "Alice", "age": 30}"#;
+        let mut app = test_app(json);
+        
+        // Enable tooltip and set current operator
+        app.tooltip.enabled = true;
+        app.tooltip.set_current_operator(Some("//".to_string()));
+
+        let output = render_to_string(&mut app, TOOLTIP_TEST_WIDTH, TOOLTIP_TEST_HEIGHT);
+        assert_snapshot!(output);
+    }
+
+    #[test]
+    fn snapshot_tooltip_operator_update() {
+        // Test operator tooltip for |= (update operator)
+        let json = r#"{"name": "Alice", "age": 30}"#;
+        let mut app = test_app(json);
+        
+        // Enable tooltip and set current operator
+        app.tooltip.enabled = true;
+        app.tooltip.set_current_operator(Some("|=".to_string()));
+
+        let output = render_to_string(&mut app, TOOLTIP_TEST_WIDTH, TOOLTIP_TEST_HEIGHT);
+        assert_snapshot!(output);
+    }
+
     // === Input Border Hint Text Tests ===
 
     #[test]

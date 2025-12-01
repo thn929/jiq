@@ -196,6 +196,217 @@ fn lookup_function(token: &str) -> Option<&'static str> {
         .map(|f| f.name)
 }
 
+/// Detect jq operator at cursor position
+///
+/// Checks for multi-char operators first (//=, //, |=, ..) to avoid partial matches.
+/// Returns None if cursor is not on an operator or if the character sequence
+/// is actually a different construct (single /, single |, single .).
+///
+/// # Arguments
+/// * `query` - The query string to search in
+/// * `cursor_pos` - The cursor position (0-indexed, in characters)
+///
+/// # Returns
+/// * `Some(&'static str)` - The operator if cursor is on an operator
+/// * `None` - If cursor is not on any operator
+///
+/// # Examples
+/// ```ignore
+/// // Cursor on alternative operator
+/// detect_operator_at_cursor(".x // \"default\"", 3) // Some("//")
+///
+/// // Cursor on update operator
+/// detect_operator_at_cursor(".x |= . + 1", 3) // Some("|=")
+///
+/// // Single pipe (not an operator we track)
+/// detect_operator_at_cursor(".x | .y", 3) // None
+/// ```
+pub fn detect_operator_at_cursor(query: &str, cursor_pos: usize) -> Option<&'static str> {
+    if query.is_empty() {
+        return None;
+    }
+
+    let chars: Vec<char> = query.chars().collect();
+    let len = chars.len();
+
+    // First, try to detect operator at current cursor position
+    if cursor_pos < len {
+        if let Some(op) = detect_operator_at_position(&chars, cursor_pos) {
+            return Some(op);
+        }
+    }
+
+    // If cursor is after the last character, check if it's immediately after an operator
+    // This handles the case when user just typed an operator (cursor is after it)
+    if cursor_pos > 0 {
+        if let Some(op) = detect_operator_at_position(&chars, cursor_pos - 1) {
+            return Some(op);
+        }
+    }
+
+    None
+}
+
+/// Detect operator at a specific position in the character array
+fn detect_operator_at_position(chars: &[char], pos: usize) -> Option<&'static str> {
+    let len = chars.len();
+
+    if pos >= len {
+        return None;
+    }
+
+    let current = chars[pos];
+
+    // Only check if cursor is on a potential operator character
+    if !matches!(current, '/' | '|' | '=' | '.') {
+        return None;
+    }
+
+    // Check for //= (3-char operator) - must check first
+    if let Some(op) = check_triple_slash_equals(chars, pos) {
+        return Some(op);
+    }
+
+    // Check for // (2-char operator)
+    if let Some(op) = check_double_slash(chars, pos) {
+        return Some(op);
+    }
+
+    // Check for |= (2-char operator)
+    if let Some(op) = check_pipe_equals(chars, pos) {
+        return Some(op);
+    }
+
+    // Check for .. (2-char operator)
+    if let Some(op) = check_double_dot(chars, pos) {
+        return Some(op);
+    }
+
+    None
+}
+
+/// Check if cursor is on //= operator
+fn check_triple_slash_equals(chars: &[char], cursor_pos: usize) -> Option<&'static str> {
+    let len = chars.len();
+    let current = chars[cursor_pos];
+
+    // Cursor could be on first /, second /, or =
+    match current {
+        '/' => {
+            // Check if this is the first / of //=
+            if cursor_pos + 2 < len
+                && chars[cursor_pos + 1] == '/'
+                && chars[cursor_pos + 2] == '='
+            {
+                return Some("//=");
+            }
+            // Check if this is the second / of //=
+            if cursor_pos > 0
+                && cursor_pos + 1 < len
+                && chars[cursor_pos - 1] == '/'
+                && chars[cursor_pos + 1] == '='
+            {
+                return Some("//=");
+            }
+        }
+        '=' => {
+            // Check if this is the = of //=
+            if cursor_pos >= 2 && chars[cursor_pos - 1] == '/' && chars[cursor_pos - 2] == '/' {
+                return Some("//=");
+            }
+        }
+        _ => {}
+    }
+
+    None
+}
+
+/// Check if cursor is on // operator (but not //=)
+fn check_double_slash(chars: &[char], cursor_pos: usize) -> Option<&'static str> {
+    let len = chars.len();
+    let current = chars[cursor_pos];
+
+    if current != '/' {
+        return None;
+    }
+
+    // Check if this is the first / of //
+    if cursor_pos + 1 < len && chars[cursor_pos + 1] == '/' {
+        // Make sure it's not //=
+        if cursor_pos + 2 >= len || chars[cursor_pos + 2] != '=' {
+            return Some("//");
+        }
+    }
+
+    // Check if this is the second / of //
+    if cursor_pos > 0 && chars[cursor_pos - 1] == '/' {
+        // Make sure it's not //=
+        if cursor_pos + 1 >= len || chars[cursor_pos + 1] != '=' {
+            return Some("//");
+        }
+    }
+
+    None
+}
+
+/// Check if cursor is on |= operator
+fn check_pipe_equals(chars: &[char], cursor_pos: usize) -> Option<&'static str> {
+    let len = chars.len();
+    let current = chars[cursor_pos];
+
+    match current {
+        '|' => {
+            // Check if | is followed by =
+            if cursor_pos + 1 < len && chars[cursor_pos + 1] == '=' {
+                return Some("|=");
+            }
+        }
+        '=' => {
+            // Check if = is preceded by |
+            if cursor_pos > 0 && chars[cursor_pos - 1] == '|' {
+                return Some("|=");
+            }
+        }
+        _ => {}
+    }
+
+    None
+}
+
+/// Check if cursor is on .. operator
+fn check_double_dot(chars: &[char], cursor_pos: usize) -> Option<&'static str> {
+    let len = chars.len();
+    let current = chars[cursor_pos];
+
+    if current != '.' {
+        return None;
+    }
+
+    // Check if this is the first . of ..
+    if cursor_pos + 1 < len && chars[cursor_pos + 1] == '.' {
+        // Make sure it's not ... (three dots)
+        if cursor_pos + 2 >= len || chars[cursor_pos + 2] != '.' {
+            // Also make sure there's no dot before (not part of ...)
+            if cursor_pos == 0 || chars[cursor_pos - 1] != '.' {
+                return Some("..");
+            }
+        }
+    }
+
+    // Check if this is the second . of ..
+    if cursor_pos > 0 && chars[cursor_pos - 1] == '.' {
+        // Make sure it's not ... (three dots)
+        if cursor_pos + 1 >= len || chars[cursor_pos + 1] != '.' {
+            // Also make sure there's no dot before the first dot (not part of ...)
+            if cursor_pos < 2 || chars[cursor_pos - 2] != '.' {
+                return Some("..");
+            }
+        }
+    }
+
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -324,6 +535,89 @@ mod tests {
     fn test_cursor_at_word_end() {
         assert_eq!(detect_function_at_cursor("map", 3), Some("map"));
         assert_eq!(detect_function_at_cursor("select", 6), Some("select"));
+    }
+
+    // ==================== Operator Detection Unit Tests ====================
+
+    #[test]
+    fn test_detect_operator_double_slash() {
+        // Cursor on first /
+        assert_eq!(detect_operator_at_cursor(".x // \"default\"", 3), Some("//"));
+        // Cursor on second /
+        assert_eq!(detect_operator_at_cursor(".x // \"default\"", 4), Some("//"));
+    }
+
+    #[test]
+    fn test_detect_operator_pipe_equals() {
+        // Cursor on |
+        assert_eq!(detect_operator_at_cursor(".x |= . + 1", 3), Some("|="));
+        // Cursor on =
+        assert_eq!(detect_operator_at_cursor(".x |= . + 1", 4), Some("|="));
+    }
+
+    #[test]
+    fn test_detect_operator_triple_slash_equals() {
+        // Cursor on first /
+        assert_eq!(detect_operator_at_cursor(".x //= 0", 3), Some("//="));
+        // Cursor on second /
+        assert_eq!(detect_operator_at_cursor(".x //= 0", 4), Some("//="));
+        // Cursor on =
+        assert_eq!(detect_operator_at_cursor(".x //= 0", 5), Some("//="));
+    }
+
+    #[test]
+    fn test_detect_operator_double_dot() {
+        // Cursor on first .
+        assert_eq!(detect_operator_at_cursor(".. | numbers", 0), Some(".."));
+        // Cursor on second .
+        assert_eq!(detect_operator_at_cursor(".. | numbers", 1), Some(".."));
+    }
+
+    #[test]
+    fn test_detect_operator_no_false_positive_single_slash() {
+        // Single / for division should not be detected
+        assert_eq!(detect_operator_at_cursor(".x / 2", 3), None);
+    }
+
+    #[test]
+    fn test_detect_operator_no_false_positive_single_pipe() {
+        // Single | for pipe should not be detected
+        assert_eq!(detect_operator_at_cursor(".x | .y", 3), None);
+    }
+
+    #[test]
+    fn test_detect_operator_no_false_positive_single_dot() {
+        // Single . for field access should not be detected
+        assert_eq!(detect_operator_at_cursor(".field", 0), None);
+        assert_eq!(detect_operator_at_cursor(".x.y", 2), None);
+    }
+
+    #[test]
+    fn test_detect_operator_empty_query() {
+        assert_eq!(detect_operator_at_cursor("", 0), None);
+    }
+
+    #[test]
+    fn test_detect_operator_cursor_outside_bounds() {
+        assert_eq!(detect_operator_at_cursor("//", 100), None);
+    }
+
+    #[test]
+    fn test_detect_operator_at_query_boundaries() {
+        // Operator at start
+        assert_eq!(detect_operator_at_cursor("// \"default\"", 0), Some("//"));
+        assert_eq!(detect_operator_at_cursor("// \"default\"", 1), Some("//"));
+        // Operator at end
+        assert_eq!(detect_operator_at_cursor(".x //", 3), Some("//"));
+        assert_eq!(detect_operator_at_cursor(".x //", 4), Some("//"));
+    }
+
+    #[test]
+    fn test_detect_operator_triple_dot_not_detected() {
+        // ... (three dots) should not be detected as ..
+        assert_eq!(detect_operator_at_cursor("...", 0), None);
+        assert_eq!(detect_operator_at_cursor("...", 1), None);
+        assert_eq!(detect_operator_at_cursor("...", 2), None);
     }
 
     // ==================== Property Tests ====================
@@ -461,6 +755,104 @@ mod tests {
                 "Cursor at position {} (beyond query length {}) should return None",
                 cursor_pos,
                 len
+            );
+        }
+
+        // **Feature: operator-tooltips, Property 1: Operator detection correctness**
+        // *For any* query string containing a supported operator (`//`, `|=`, `//=`, `..`)
+        // and *for any* cursor position on any character of that operator,
+        // the detection function SHALL return that operator.
+        // **Validates: Requirements 1.1, 2.1, 3.1, 4.1**
+        #[test]
+        fn prop_operator_detection_correctness(
+            op_index in 0usize..4,
+            prefix in "[a-z ]{0,5}",
+            suffix in "[ a-z0-9\"]{0,10}",
+            cursor_offset in 0usize..3
+        ) {
+            let operators = ["//", "|=", "//=", ".."];
+            let op = operators[op_index];
+
+            let query = format!("{}{}{}", prefix, op, suffix);
+            let op_start = prefix.len();
+            let op_len = op.len();
+
+            // Skip if suffix starts with characters that would extend the operator
+            // (e.g., suffix starting with '.' would turn '..' into '...')
+            if op == ".." && suffix.starts_with('.') {
+                return Ok(());
+            }
+            // Skip if suffix starts with '=' which would turn '//' into '//='
+            if op == "//" && suffix.starts_with('=') {
+                return Ok(());
+            }
+
+            // Test cursor on each character of the operator
+            if cursor_offset < op_len {
+                let cursor_pos = op_start + cursor_offset;
+                let result = detect_operator_at_cursor(&query, cursor_pos);
+                prop_assert_eq!(
+                    result,
+                    Some(op),
+                    "Cursor at position {} in '{}' should detect operator '{}'",
+                    cursor_pos,
+                    query,
+                    op
+                );
+            }
+        }
+
+        // **Feature: operator-tooltips, Property 2: No false positives on similar characters**
+        // *For any* query string containing single characters that resemble operators
+        // (single `/` for division, single `|` for pipe, single `.` for field access),
+        // the detection function SHALL return None when cursor is on those characters.
+        // **Validates: Requirements 1.2, 2.2, 4.2**
+        #[test]
+        fn prop_no_false_positives_single_chars(
+            char_index in 0usize..3,
+            prefix in "[a-z0-9]{1,5}",
+            suffix in "[a-z0-9]{1,5}"
+        ) {
+            let single_chars = ['/', '|', '.'];
+            let single_char = single_chars[char_index];
+
+            // Build query with single character that should NOT be detected as operator
+            let query = format!("{}{}{}", prefix, single_char, suffix);
+            let char_pos = prefix.len();
+
+            let result = detect_operator_at_cursor(&query, char_pos);
+            prop_assert_eq!(
+                result,
+                None,
+                "Single '{}' at position {} in '{}' should NOT be detected as operator",
+                single_char,
+                char_pos,
+                query
+            );
+        }
+
+        // **Feature: operator-tooltips, Property 3: Multi-char operator detection order**
+        // *For any* query containing `//=`, when cursor is on any of the three characters,
+        // the detection function SHALL return `//=` (not `//`).
+        // **Validates: Requirements 3.2**
+        #[test]
+        fn prop_multi_char_detection_order(
+            prefix in "[a-z ]{0,5}",
+            suffix in "[ a-z0-9]{0,5}",
+            cursor_offset in 0usize..3
+        ) {
+            // Test that //= is detected correctly (not as //)
+            let query = format!("{}//={}", prefix, suffix);
+            let op_start = prefix.len();
+
+            let cursor_pos = op_start + cursor_offset;
+            let result = detect_operator_at_cursor(&query, cursor_pos);
+            prop_assert_eq!(
+                result,
+                Some("//="),
+                "Cursor at position {} in '{}' should detect '//=' not '//'",
+                cursor_pos,
+                query
             );
         }
     }

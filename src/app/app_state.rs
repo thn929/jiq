@@ -113,13 +113,23 @@ impl App {
     }
 
     /// Update tooltip state based on current cursor position
-    /// Detects if cursor is on or inside a jq function and updates tooltip accordingly
+    /// Detects if cursor is on or inside a jq function or operator and updates tooltip accordingly
+    /// Functions take priority over operators when both could apply
     pub fn update_tooltip(&mut self) {
         let query = self.input.query();
         let cursor_pos = self.input.textarea.cursor().1; // Column position
         
+        // Detect function (takes priority)
         let detected_function = tooltip::detect_function_at_cursor(query, cursor_pos);
         self.tooltip.set_current_function(detected_function.map(|s| s.to_string()));
+        
+        // Detect operator only if no function detected (function takes priority)
+        let detected_operator = if detected_function.is_none() {
+            tooltip::detect_operator_at_cursor(query, cursor_pos)
+        } else {
+            None
+        };
+        self.tooltip.set_current_operator(detected_operator.map(|s| s.to_string()));
     }
 
     /// Update stats based on the last successful result
@@ -1011,6 +1021,190 @@ mod tests {
         assert!(!app.tooltip.should_show());
     }
 
+    // ========== Operator Tooltip Integration Tests ==========
+
+    #[test]
+    fn test_update_tooltip_detects_operator_double_slash() {
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type a query with the // operator
+        app.input.textarea.insert_str(".name // \"default\"");
+        
+        // Move cursor to be on the first /
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+        for _ in 0..6 { // Position 6 is on first /
+            app.input.textarea.move_cursor(tui_textarea::CursorMove::Forward);
+        }
+        
+        app.update_tooltip();
+        
+        assert!(app.tooltip.current_function.is_none());
+        assert_eq!(app.tooltip.current_operator, Some("//".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_detects_operator_pipe_equals() {
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type a query with the |= operator
+        app.input.textarea.insert_str(".name |= ascii_upcase");
+        
+        // Move cursor to be on the |
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+        for _ in 0..6 { // Position 6 is on |
+            app.input.textarea.move_cursor(tui_textarea::CursorMove::Forward);
+        }
+        
+        app.update_tooltip();
+        
+        assert!(app.tooltip.current_function.is_none());
+        assert_eq!(app.tooltip.current_operator, Some("|=".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_detects_operator_alternative_assignment() {
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type a query with the //= operator
+        app.input.textarea.insert_str(".count //= 0");
+        
+        // Move cursor to be on the first /
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+        for _ in 0..7 { // Position 7 is on first /
+            app.input.textarea.move_cursor(tui_textarea::CursorMove::Forward);
+        }
+        
+        app.update_tooltip();
+        
+        assert!(app.tooltip.current_function.is_none());
+        assert_eq!(app.tooltip.current_operator, Some("//=".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_detects_operator_recursive_descent() {
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type a query with the .. operator
+        app.input.textarea.insert_str(".. | numbers");
+        
+        // Move cursor to be on the first .
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+        
+        app.update_tooltip();
+        
+        assert!(app.tooltip.current_function.is_none());
+        assert_eq!(app.tooltip.current_operator, Some("..".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_no_operator_on_single_pipe() {
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type a query with a single pipe (not |=)
+        app.input.textarea.insert_str(".name | length");
+        
+        // Move cursor to be on the |
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+        for _ in 0..6 { // Position 6 is on |
+            app.input.textarea.move_cursor(tui_textarea::CursorMove::Forward);
+        }
+        
+        app.update_tooltip();
+        
+        // Single pipe should NOT trigger operator tooltip
+        assert!(app.tooltip.current_function.is_none());
+        assert!(app.tooltip.current_operator.is_none());
+        assert!(!app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_cursor_after_operator_detects_it() {
+        // When user types "//", cursor ends up at position 2 (after the operator)
+        // The tooltip should still show because we detect operators immediately before cursor
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type just "//" - cursor will be at position 2 (after the operator)
+        app.input.textarea.insert_str("//");
+        
+        // Cursor is now at position 2 (after the //)
+        let cursor_pos = app.input.textarea.cursor().1;
+        assert_eq!(cursor_pos, 2, "Cursor should be at position 2 after typing //");
+        
+        app.update_tooltip();
+        
+        // Cursor AFTER operator should now detect it (extended behavior)
+        assert_eq!(app.tooltip.current_operator, Some("//".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_cursor_on_operator_detects_it() {
+        // When cursor is ON the operator (e.g., user moved cursor back), it should detect
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        // Type "//" then move cursor back onto it
+        app.input.textarea.insert_str("//");
+        app.input.textarea.move_cursor(tui_textarea::CursorMove::Back); // Now on second /
+        
+        app.update_tooltip();
+        
+        assert_eq!(app.tooltip.current_operator, Some("//".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_cursor_after_pipe_equals() {
+        // Test |= operator detection when cursor is after it
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        app.input.textarea.insert_str("|=");
+        
+        app.update_tooltip();
+        
+        assert_eq!(app.tooltip.current_operator, Some("|=".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_cursor_after_alternative_assignment() {
+        // Test //= operator detection when cursor is after it
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        app.input.textarea.insert_str("//=");
+        
+        app.update_tooltip();
+        
+        assert_eq!(app.tooltip.current_operator, Some("//=".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
+    #[test]
+    fn test_update_tooltip_cursor_after_double_dot() {
+        // Test .. operator detection when cursor is after it
+        let json = r#"{"name": "test"}"#;
+        let mut app = test_app(json);
+        
+        app.input.textarea.insert_str("..");
+        
+        app.update_tooltip();
+        
+        assert_eq!(app.tooltip.current_operator, Some("..".to_string()));
+        assert!(app.tooltip.should_show());
+    }
+
     // **Feature: function-tooltip, Property 1: Tooltip visibility follows cursor on functions**
     // *For any* query string containing jq functions and any cursor position, when tooltip is enabled:
     // - If cursor is inside a function's parentheses, `should_show()` returns true and `current_function` matches the innermost enclosing function
@@ -1179,6 +1373,78 @@ mod tests {
                     app.tooltip.current_function.as_deref(),
                     Some(func_name),
                     "Current function should still be detected when disabled"
+                );
+            }
+
+            // **Feature: operator-tooltips, Property 4: Function priority over operator**
+            // *For any* query where cursor position could match both a function context
+            // (inside function parens) and an operator, the system SHALL show the function
+            // tooltip, not the operator tooltip.
+            // **Validates: Requirements 5.3**
+            #[test]
+            fn prop_function_priority_over_operator(
+                func_index in 0usize..JQ_FUNCTION_METADATA.len(),
+                op_index in 0usize..4usize,
+                left_operand in "[.a-z]{1,5}",
+                right_operand in "[a-z0-9\"]{1,5}"
+            ) {
+                let func = &JQ_FUNCTION_METADATA[func_index];
+                
+                // Only test functions that take arguments (have parens)
+                if !func.needs_parens {
+                    return Ok(());
+                }
+                
+                let func_name = func.name;
+                let operators = ["//", "|=", "//=", ".."];
+                let op = operators[op_index];
+                
+                // Build query like "select(. // x)" or "map(.x |= . + 1)"
+                let query = format!("{}({} {} {})", func_name, left_operand, op, right_operand);
+                
+                // Calculate position of operator inside the parens
+                let op_start = func_name.len() + 1 + left_operand.len() + 1; // func( + left + space
+                
+                let json = r#"{"test": true}"#;
+                let mut app = test_app(json);
+                
+                // Insert the query
+                app.input.textarea.insert_str(&query);
+                
+                // Move cursor to be on the operator
+                app.input.textarea.move_cursor(tui_textarea::CursorMove::Head);
+                for _ in 0..op_start {
+                    app.input.textarea.move_cursor(tui_textarea::CursorMove::Forward);
+                }
+                
+                // Update tooltip
+                app.update_tooltip();
+                
+                // Function should take priority - current_function should be set
+                prop_assert_eq!(
+                    app.tooltip.current_function.as_deref(),
+                    Some(func_name),
+                    "Function '{}' should be detected (priority over operator '{}') in query '{}'",
+                    func_name,
+                    op,
+                    query
+                );
+                
+                // Operator should NOT be detected when inside function parens
+                prop_assert!(
+                    app.tooltip.current_operator.is_none(),
+                    "Operator '{}' should NOT be detected when inside function '{}' parens in query '{}'",
+                    op,
+                    func_name,
+                    query
+                );
+                
+                // Tooltip should show (function detected)
+                prop_assert!(
+                    app.tooltip.should_show(),
+                    "Tooltip should show for function '{}' in query '{}'",
+                    func_name,
+                    query
                 );
             }
         }
