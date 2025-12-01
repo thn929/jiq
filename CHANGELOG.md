@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.0] - 2025-11-30
+
+### Added
+- Search-in-results functionality with real-time highlighting
+  - `/` in Results pane to open search bar
+  - Case-insensitive fuzzy matching across result lines
+  - Live match highlighting with distinct colors (magenta for current, yellow for others)
+  - Match count display in search bar (e.g., "Match 2/5")
+  - `n` to jump to next match, `N` to jump to previous match
+  - `Enter` to accept search and keep matches highlighted
+  - `ESC` to cancel search and clear highlighting
+  - Search bar auto-clears when switching focus or exiting
+  - Maintains horizontal scroll position when jumping between matches
+  - Comprehensive property-based and snapshot tests for search behavior
+
 ## [2.19.3] - 2025-11-30
 
 ### Added
