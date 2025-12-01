@@ -1,5 +1,5 @@
 mod app_events;
-mod render;
+mod app_render;
 mod app_state;
 
 // Re-export public types
