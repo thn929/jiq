@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.20.3] - 2025-12-01
+
+### Internal
+- Refactored state management into feature-specific modules
+  - Extracted autocomplete state into `autocomplete/autocomplete_state.rs` and `autocomplete/insertion.rs`
+  - Extracted stats state into `stats/stats_state.rs`
+  - Extracted tooltip state into `tooltip/tooltip_state.rs`
+  - Reduced `app_state.rs` from ~1300 lines to ~150 lines
+- Improved code organization and maintainability with better separation of concerns
+
 ## [2.20.2] - 2025-01-30
 
 ### Added
