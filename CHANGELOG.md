@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.21.0] - 2025-12-12
+
+### Added
+- Object key autocomplete for jq object literals
+  - Intelligent suggestions when building jq objects with `{key: value}` syntax
+  - Brace tracking system to understand nested object/array contexts
+  - Enhanced context detection for object construction scenarios
+  - Improved insertion logic with proper cursor positioning for object keys
+  - Supports complex nested structures and multi-pass context scanning
+
 ## [2.20.6] - 2025-12-11
 
 ### Fixed
