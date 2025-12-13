@@ -1,6 +1,9 @@
 # jiq — Interactive JSON query tool with real-time output
 
-[![codecov](https://codecov.io/github/bellicose100xp/jiq/graph/badge.svg?token=2NOB7SCD6R)](https://codecov.io/github/bellicose100xp/jiq)
+[![CI](https://github.com/bellicose100xp/jiq/workflows/CI/badge.svg)](https://github.com/bellicose100xp/jiq/actions)
+[![Coverage](https://codecov.io/github/bellicose100xp/jiq/graph/badge.svg?token=2NOB7SCD6R)](https://codecov.io/github/bellicose100xp/jiq)
+[![Crates.io](https://img.shields.io/crates/v/jiq)](https://crates.io/crates/jiq)
+[![License](https://img.shields.io/crates/l/jiq)](LICENSE-MIT)
 
 ## Features
 
