@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.3] - 2025-12-16
+
+### Fixed
+- Reverted manual workflow changes to use cargo-dist generated workflow
+  - Manual edits to release.yml are not supported by cargo-dist
+  - Original workflow configuration restored for proper CI/CD operation
+
 ## [3.0.2] - 2025-12-16
 
 ### Fixed
 - Release workflow: Download cached dist binary in build-local-artifacts job
   - Fixes "dist: command not found" error in musl container builds
-  - Ensures dist is available before running build commands
+  - Ensures dist is available before running build commands (reverted in 3.0.3)
 
 ## [3.0.1] - 2025-12-16
 
