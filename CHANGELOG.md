@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2025-12-17
+
+### Added
+- **AWS Bedrock AI Provider** - Alternative to Anthropic for AI-powered query suggestions
+  - Support for AWS Bedrock models (e.g., Claude via Bedrock) with AWS credentials
+  - Streaming support via AWS SDK for real-time token-by-token responses
+  - Comprehensive error handling with detailed messages for:
+    - Missing/invalid AWS credentials
+    - Network errors
+    - Model access issues
+    - Configuration validation
+  - AWS credential chain support (environment vars, `~/.aws/credentials`, named profiles)
+  - Panic handling to prevent AWS SDK panics from corrupting TUI
+  - Configuration in `~/.config/jiq/config.toml`:
+    ```toml
+    [ai]
+    enabled = true
+    provider = "bedrock"
+
+    [ai.bedrock]
+    region = "us-east-1"
+    model = "anthropic.claude-3-haiku-20240307-v1:0"
+    profile = "my-aws-profile"  # optional
+    ```
+
+### Changed
+- **Multi-Provider Error Context** - Refactored `AiError` enum for better provider support
+  - Convert tuple variants to struct variants with named fields
+  - Add `provider` field to error variants (NotConfigured, Network, Api, Parse)
+  - Error messages now include `[Provider]` prefix for clearer diagnostics
+  - Add `provider_name()` method to `AsyncAiProvider` trait
+  - Mark `AiError` as `#[non_exhaustive]` for future extensibility
+
+### Dependencies
+- Added `aws-config` (with rustls for musl compatibility)
+- Added `aws-sdk-bedrockruntime` (with rustls)
+
 ## [3.0.4] - 2025-12-17
 
 ### Added
