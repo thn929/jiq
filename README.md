@@ -281,6 +281,7 @@ backend = "auto"
 
 [ai]
 # Enable AI assistant
+# Prefer faster models like claude haiku or open ai mini or gemini flash
 enabled = true
 # Provider: "anthropic" (default) or "bedrock"
 provider = "anthropic"
@@ -288,17 +289,12 @@ provider = "anthropic"
 [ai.anthropic]
 # Get your API key from: https://console.anthropic.com/settings/keys
 api_key = "your-api-key-here"
-# Anthropic model to use (e.g., "claude-haiku-4-5-20251001", "claude-sonnet-4-5-20250514")
 model = "claude-haiku-4-5-20251001"
 
 # Alternative: AWS Bedrock provider
-# [ai]
-# enabled = true
-# provider = "bedrock"
-#
 # [ai.bedrock]
 # region = "us-east-1"
-# model = "anthropic.claude-3-haiku-20240307-v1:0"
+# model = "global.anthropic.claude-3-haiku-20240307-v1:0"
 # profile = "default"  # Optional: AWS profile name (uses default credential chain if omitted)
 ```
 
