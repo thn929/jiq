@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.0] - 2025-12-17
+
+### Added
+- **Google Gemini AI Provider** - Google Gemini as an alternative AI provider for query suggestions
+  - Support for Gemini models (e.g., gemini-2.0-flash-exp) with API key authentication
+  - Streaming support via Server-Sent Events (SSE) for real-time token-by-token responses
+  - Comprehensive error handling with detailed messages for:
+    - Missing/invalid API keys
+    - Network errors
+    - Model access issues
+    - Rate limiting
+    - Configuration validation
+  - Configuration in `~/.config/jiq/config.toml`:
+    ```toml
+    [ai]
+    enabled = true
+    provider = "gemini"
+
+    [ai.gemini]
+    api_key = "your-api-key-here"
+    model = "gemini-2.0-flash-exp"
+    ```
+  - Provider information displayed in AI popup header
+  - Full test coverage with property-based tests, snapshot tests, and SSE stream parsing tests
+  - Reusable SSE parsing utilities for all streaming providers
+
+### Changed
+- Enhanced SSE parser to support multiple provider formats (OpenAI, Anthropic, Gemini)
+- Provider system now supports three streaming AI providers with consistent interfaces
+
 ## [3.2.0] - 2025-12-17
 
 ### Added
