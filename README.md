@@ -307,7 +307,7 @@ model = "gemini-3-flash-preview"
 
 [ai.bedrock]
 region = "us-east-1"
-model = "global.anthropic.claude-3-haiku-20240307-v1:0"
+model = "global.anthropic.claude-haiku-4-5-20251001-v1:0"
 profile = "default"  # Optional: AWS profile name (uses default credential chain if omitted)
 ```
 
