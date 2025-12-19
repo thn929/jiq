@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1] - 2025-12-18
+
+### Added
+- **Full-width selection highlighting** for AI suggestions
+  - Selected suggestions now display edge-to-edge background highlighting
+  - Replaced fragmented text-only highlighting with proper widget-based rendering
+  - Each suggestion rendered as independent widget with full-width DarkGray background
+  - Improves visual clarity and makes selection state immediately obvious
+- **Height persistence during loading** to prevent popup flickering
+  - Popup maintains consistent size when user types
+  - Stored height reused during loading transitions
+  - Eliminates jarring size changes between suggestion updates
+- **Consistent spacing** between AI suggestions
+  - Uniform 1-line spacing between all suggestions
+  - Fixed inconsistent spacing that made suggestions appear cluttered
+  - Clean visual separation using Layout spacing chunks
+- **Model name display** in AI popup header
+  - Shows currently configured AI model (e.g., "claude-3-5-sonnet-20241022")
+  - Displayed on right side of popup title bar
+  - Truncates with ellipsis if name is too long
+- Comprehensive test suite for widget rendering
+  - 5 height persistence tests
+  - 5 spacing validation snapshot tests
+  - 7 widget selection snapshot tests
+  - 2 widget background unit tests
+
+### Fixed
+- AI suggestions now accessible with Ctrl+A even when `enabled = false` in config
+  - Previously required `enabled = true` for keyboard shortcuts to work
+  - Now correctly checks `configured` status instead of `enabled`
+  - Improves UX for users who keep AI disabled by default
+
+### Changed
+- AI suggestion popup positioning uses dynamic height based on content
+  - No more wasted vertical space below suggestions
+  - Popup shrinks to fit actual content height
+  - Maintains bottom-right position above input bar
+- Keybindings moved from popup title to bottom border
+  - Better visual hierarchy and cleaner title area
+  - Easier to reference while interacting with suggestions
+
+### Refactored
+- Split `provider_tests.rs` into focused test modules
+  - `anthropic_tests.rs`, `bedrock_tests.rs`, `openai_tests.rs`, `gemini_tests.rs`
+  - `error_tests.rs` for cross-provider error handling
+  - Improved maintainability and test organization
+
 ## [3.3.0] - 2025-12-17
 
 ### Added
