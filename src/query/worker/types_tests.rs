@@ -5,9 +5,6 @@ fn test_query_error_display() {
     let err = QueryError::SpawnFailed("test error".to_string());
     assert_eq!(err.to_string(), "Failed to spawn jq: test error");
 
-    let err = QueryError::StdinWriteFailed("write error".to_string());
-    assert_eq!(err.to_string(), "Failed to write to jq stdin: write error");
-
     let err = QueryError::OutputReadFailed("read error".to_string());
     assert_eq!(err.to_string(), "Failed to read jq output: read error");
 

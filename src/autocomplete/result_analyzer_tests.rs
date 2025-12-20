@@ -1,12 +1,43 @@
 //! Tests for result analysis and suggestion generation
 
 use super::*;
+use serde_json::Value;
+use std::sync::Arc;
+
+/// Helper function to parse JSON string and wrap in Arc for testing
+///
+/// For multi-line JSON (destructured objects), parses only the first complete object
+fn parse_json(json_str: &str) -> Arc<Value> {
+    // Try parsing the whole string first
+    if let Ok(value) = serde_json::from_str(json_str) {
+        return Arc::new(value);
+    }
+
+    // If that fails, try to parse the first complete JSON object by accumulating lines
+    let mut accumulated = String::new();
+    for line in json_str.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        accumulated.push_str(line);
+        accumulated.push('\n');
+
+        // Try parsing after each line
+        if let Ok(value) = serde_json::from_str::<Value>(&accumulated) {
+            return Arc::new(value);
+        }
+    }
+
+    // If all else fails, return Null
+    Arc::new(Value::Null)
+}
 
 #[test]
 fn test_analyze_simple_object() {
     let result = r#"{"name": "test", "age": 30, "active": true}"#;
-    let suggestions = ResultAnalyzer::analyze_result(
-        result,
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(
+        &parsed,
         ResultType::Object,
         true, // After operator like | or at start
     );
@@ -21,7 +52,8 @@ fn test_analyze_simple_object() {
 fn test_analyze_nested_object() {
     // Nested object after operator
     let result = r#"{"user": {"name": "Alice", "profile": {"city": "NYC"}}}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     // Should only return top-level fields
     assert_eq!(suggestions.len(), 1);
@@ -32,7 +64,9 @@ fn test_analyze_nested_object() {
 fn test_analyze_array_of_objects_after_operator() {
     // Array of objects after operator (needs leading dot)
     let result = r#"[{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, true);
 
     // Should return .[] and element field suggestions with leading dot
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -44,7 +78,9 @@ fn test_analyze_array_of_objects_after_operator() {
 fn test_analyze_array_of_objects_after_continuation() {
     // Array of objects after continuation like .services. (no leading dot)
     let result = r#"[{"id": 1, "name": "a"}, {"id": 2, "name": "b"}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, false);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, false);
 
     // Should return [] and element field suggestions without leading dot
     assert!(suggestions.iter().any(|s| s.text == "[]"));
@@ -56,7 +92,8 @@ fn test_analyze_array_of_objects_after_continuation() {
 fn test_analyze_empty_array() {
     // Empty array after operator
     let result = "[]";
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Array, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Array, true);
 
     // Should only return .[] for empty arrays
     assert_eq!(suggestions.len(), 1);
@@ -67,7 +104,8 @@ fn test_analyze_empty_array() {
 fn test_analyze_empty_object() {
     // Empty object
     let result = "{}";
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     assert_eq!(suggestions.len(), 0);
 }
@@ -83,7 +121,8 @@ fn test_analyze_pretty_printed_object() {
   "name": "Alice",
   "age": 30
 }"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     assert_eq!(suggestions.len(), 2);
     assert!(suggestions.iter().any(|s| s.text == ".name"));
@@ -100,8 +139,9 @@ fn test_multivalue_destructured_objects_after_bracket() {
     let result = r#"{"name": "Alice", "age": 30}
 {"name": "Bob", "age": 25}
 {"name": "Charlie", "age": 35}"#;
+    let parsed = parse_json(result);
     let suggestions =
-        ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, false);
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, false);
 
     // Should parse first object only, no leading dot
     assert_eq!(suggestions.len(), 2);
@@ -114,7 +154,9 @@ fn test_multivalue_destructured_objects_after_operator() {
     // Destructured objects after operator (with leading dot)
     let result = r#"{"clusterArn": "arn1", "name": "svc1"}
 {"clusterArn": "arn2", "name": "svc2"}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, true);
 
     // Should parse first object with leading dot
     assert_eq!(suggestions.len(), 2);
@@ -133,8 +175,9 @@ fn test_multivalue_pretty_printed_destructured_after_bracket() {
   "clusterArn": "arn2",
   "name": "svc2"
 }"#;
+    let parsed = parse_json(result);
     let suggestions =
-        ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, false);
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, false);
 
     // Should parse first object, no leading dot
     assert_eq!(suggestions.len(), 2);
@@ -148,7 +191,8 @@ fn test_multivalue_mixed_types() {
     let result = r#"42
 "hello"
 {"field": "value"}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Number, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Number, true);
 
     // Primitives have no field suggestions
     assert_eq!(suggestions.len(), 0);
@@ -163,7 +207,9 @@ fn test_multivalue_with_whitespace() {
 
 {"key2": "val2"}
 "#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, true);
 
     // Should skip empty lines and parse first object with leading dot
     assert_eq!(suggestions.len(), 1);
@@ -179,7 +225,8 @@ fn test_object_constructor_suggestions_after_operator() {
     // THE main fix: after `.services[] | {name: .serviceName, cap: .base}`
     // Result is object with ONLY "name" and "cap" fields
     let result = r#"{"name": "MyService", "cap": 10}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     assert_eq!(suggestions.len(), 2);
     assert!(suggestions.iter().any(|s| s.text == ".name"));
@@ -194,7 +241,8 @@ fn test_object_constructor_suggestions_after_operator() {
 fn test_array_constructor_suggestions() {
     // After `[.field1, .field2]` the result is a primitive array
     let result = r#"["value1", "value2"]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Array, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Array, true);
 
     // Should suggest .[] for array access
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -208,29 +256,32 @@ fn test_array_constructor_suggestions() {
 fn test_primitive_results() {
     // Primitives have no field suggestions
     assert_eq!(
-        ResultAnalyzer::analyze_result("42", ResultType::Number, true).len(),
+        ResultAnalyzer::analyze_parsed_result(&parse_json("42"), ResultType::Number, true).len(),
         0
     );
     assert_eq!(
-        ResultAnalyzer::analyze_result(r#""hello""#, ResultType::String, true).len(),
+        ResultAnalyzer::analyze_parsed_result(&parse_json(r#""hello""#), ResultType::String, true)
+            .len(),
         0
     );
     assert_eq!(
-        ResultAnalyzer::analyze_result("true", ResultType::Boolean, true).len(),
+        ResultAnalyzer::analyze_parsed_result(&parse_json("true"), ResultType::Boolean, true).len(),
         0
     );
 }
 
 #[test]
 fn test_null_result() {
-    let suggestions = ResultAnalyzer::analyze_result("null", ResultType::Null, true);
+    let parsed = parse_json("null");
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Null, true);
     assert_eq!(suggestions.len(), 0);
 }
 
 #[test]
 fn test_empty_string_result() {
     // Empty result treated as null
-    let suggestions = ResultAnalyzer::analyze_result("", ResultType::Null, true);
+    let parsed = parse_json("");
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Null, true);
     assert_eq!(suggestions.len(), 0);
 }
 
@@ -238,7 +289,8 @@ fn test_empty_string_result() {
 fn test_invalid_json_result() {
     // Invalid JSON treated as null - returns empty gracefully
     let result = "not valid json {]";
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Null, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Null, true);
     assert_eq!(suggestions.len(), 0);
 }
 
@@ -259,7 +311,9 @@ fn test_very_large_result() {
     }
     result.push(']');
 
-    let suggestions = ResultAnalyzer::analyze_result(&result, ResultType::ArrayOfObjects, true);
+    let parsed = parse_json(&result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, true);
 
     // Should extract fields from first array element with leading dot
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -276,7 +330,9 @@ fn test_very_large_result() {
 fn test_array_with_nulls_in_result() {
     // Array with nulls from optional chaining, after operator
     let result = r#"[null, null, {"field": "value"}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, true);
 
     // Should suggest based on first element (null has no fields)
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -287,7 +343,9 @@ fn test_array_with_nulls_in_result() {
 fn test_bounded_scan_in_results() {
     // Test that we only look at the first element, not all elements
     let result = r#"[{"a": 1}, {"b": 2}, {"c": 3}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, true);
 
     // Should only have fields from first element with leading dot
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -309,8 +367,9 @@ fn test_destructured_objects_after_bracket_no_prefix() {
     // After .services[]. → destructured objects, no prefix
     let result = r#"{"serviceArn": "arn1", "config": {}}
 {"serviceArn": "arn2", "config": {}}"#;
+    let parsed = parse_json(result);
     let suggestions =
-        ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, false);
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, false);
 
     // Should suggest fields without any prefix
     assert!(suggestions.iter().any(|s| s.text == "serviceArn"));
@@ -324,7 +383,9 @@ fn test_destructured_objects_after_pipe_with_prefix() {
     // After .services[] | . → destructured objects, needs leading dot
     let result = r#"{"serviceArn": "arn1"}
 {"serviceArn": "arn2"}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::DestructuredObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::DestructuredObjects, true);
 
     // Should suggest fields WITH leading dot
     assert!(suggestions.iter().any(|s| s.text == ".serviceArn"));
@@ -336,7 +397,9 @@ fn test_destructured_objects_after_pipe_with_prefix() {
 fn test_array_of_objects_after_dot_no_prefix() {
     // After .services. → array of objects, no leading dot
     let result = r#"[{"id": 1}, {"id": 2}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, false);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, false);
 
     // Should suggest [] and [].field without leading dot
     assert!(suggestions.iter().any(|s| s.text == "[]"));
@@ -349,7 +412,9 @@ fn test_array_of_objects_after_dot_no_prefix() {
 fn test_array_of_objects_after_pipe_with_prefix() {
     // After .services | . → array of objects, needs leading dot
     let result = r#"[{"id": 1}, {"id": 2}]"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::ArrayOfObjects, true);
+    let parsed = parse_json(result);
+    let suggestions =
+        ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::ArrayOfObjects, true);
 
     // Should suggest .[] and .[].field with leading dot
     assert!(suggestions.iter().any(|s| s.text == ".[]"));
@@ -362,7 +427,8 @@ fn test_array_of_objects_after_pipe_with_prefix() {
 fn test_single_object_after_bracket_no_prefix() {
     // After .user[0]. → single object, no leading dot
     let result = r#"{"name": "Alice", "age": 30}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, false);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, false);
 
     // Should suggest fields without leading dot
     assert!(suggestions.iter().any(|s| s.text == "name"));
@@ -374,7 +440,8 @@ fn test_single_object_after_bracket_no_prefix() {
 fn test_single_object_after_operator_with_prefix() {
     // After .user | . → single object, needs leading dot
     let result = r#"{"name": "Alice", "age": 30}"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     // Should suggest fields WITH leading dot
     assert!(suggestions.iter().any(|s| s.text == ".name"));
@@ -386,7 +453,8 @@ fn test_single_object_after_operator_with_prefix() {
 fn test_primitive_array_after_operator() {
     // Array of primitives after operator
     let result = "[1, 2, 3]";
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Array, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Array, true);
 
     // Should only suggest .[]
     assert_eq!(suggestions.len(), 1);
@@ -397,7 +465,8 @@ fn test_primitive_array_after_operator() {
 fn test_primitive_array_after_continuation() {
     // Array of primitives after continuation
     let result = "[1, 2, 3]";
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Array, false);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Array, false);
 
     // Should only suggest [] (no leading dot)
     assert_eq!(suggestions.len(), 1);
@@ -415,7 +484,8 @@ fn test_field_type_detection() {
             "obj": {"nested": "value"},
             "arr": [1, 2, 3]
         }"#;
-    let suggestions = ResultAnalyzer::analyze_result(result, ResultType::Object, true);
+    let parsed = parse_json(result);
+    let suggestions = ResultAnalyzer::analyze_parsed_result(&parsed, ResultType::Object, true);
 
     // Verify types are correctly detected
     let str_field = suggestions.iter().find(|s| s.text == ".str").unwrap();

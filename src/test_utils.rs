@@ -3,6 +3,7 @@ pub mod test_helpers {
     use crate::app::App;
     use crate::config::Config;
     use crate::history::HistoryState;
+    use crate::input::FileLoader;
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
     pub const TEST_JSON: &str = r#"{
@@ -13,8 +14,28 @@ pub mod test_helpers {
         "items": [{"tags": [{"name": "tag1"}]}]
     }"#;
 
+    /// Create a FileLoader with pre-loaded JSON for testing
+    ///
+    /// This helper creates a FileLoader that immediately has the JSON available,
+    /// avoiding the need for actual file I/O or background threads in tests.
+    pub fn create_test_loader(json: String) -> FileLoader {
+        use crate::input::loader::LoadingState;
+        use std::sync::mpsc::channel;
+        let (tx, rx) = channel();
+        // Send the result immediately so poll() will return it
+        let _ = tx.send(Ok(json));
+        FileLoader {
+            state: LoadingState::Loading,
+            rx: Some(rx),
+        }
+    }
+
     pub fn test_app(json: &str) -> App {
-        App::new(json.to_string(), &Config::default())
+        let loader = create_test_loader(json.to_string());
+        let mut app = App::new_with_loader(loader, &Config::default());
+        // Poll the loader to complete loading
+        app.poll_file_loader();
+        app
     }
 
     pub fn key(code: KeyCode) -> KeyEvent {

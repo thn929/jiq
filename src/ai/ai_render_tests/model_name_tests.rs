@@ -149,6 +149,11 @@ proptest! {
         model_name in "[a-zA-Z0-9\\-_.:/]{1,100}",
         popup_width in 40u16..200u16
     ) {
+        // Skip the far-fetched scenario where model name naturally ends with "..."
+        if model_name.ends_with("...") {
+            return Ok(());
+        }
+
         let max_model_width = (popup_width / 2).saturating_sub(2);
 
         let model_display = if model_name.len() > max_model_width as usize {

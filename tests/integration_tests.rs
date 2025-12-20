@@ -14,6 +14,22 @@ fn fixture_path(name: &str) -> PathBuf {
         .join(name)
 }
 
+/// Create a FileLoader with pre-loaded JSON for testing
+///
+/// This helper creates a FileLoader that immediately has the JSON available,
+/// avoiding the need for actual file I/O in integration tests.
+fn create_test_loader(json: String) -> jiq::input::FileLoader {
+    use jiq::input::loader::LoadingState;
+    use std::sync::mpsc::channel;
+    let (tx, rx) = channel();
+    // Send the result immediately so poll() will return it
+    let _ = tx.send(Ok(json));
+    jiq::input::FileLoader {
+        state: LoadingState::Loading,
+        rx: Some(rx),
+    }
+}
+
 // Note: These tests are commented out because with Phase 2 (deferred file loading),
 // the app enters TUI mode immediately and shows errors in the UI rather than
 // exiting with error codes. The TUI-based error handling provides better UX
@@ -428,7 +444,8 @@ fn test_initial_visibility_ai_enabled() {
     };
 
     let json_input = r#"{"test": "data"}"#.to_string();
-    let app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let app = App::new_with_loader(loader, &config);
 
     // Requirement 8.1: AI enabled → popup visible by default
     assert!(
@@ -451,7 +468,8 @@ fn test_initial_visibility_ai_disabled() {
     let config = Config::default();
 
     let json_input = r#"{"test": "data"}"#.to_string();
-    let app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let app = App::new_with_loader(loader, &config);
 
     // Requirement 8.2: AI disabled → popup hidden by default
     assert!(
@@ -487,7 +505,8 @@ fn test_tooltip_hidden_when_ai_visible_on_startup() {
     };
 
     let json_input = r#"{"test": "data"}"#.to_string();
-    let app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let app = App::new_with_loader(loader, &config);
 
     // AI should be visible
     assert!(app.ai.visible, "AI popup should be visible");
@@ -514,7 +533,8 @@ fn test_tooltip_visible_when_ai_disabled_on_startup() {
     };
 
     let json_input = r#"{"test": "data"}"#.to_string();
-    let app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let app = App::new_with_loader(loader, &config);
 
     // AI should be hidden
     assert!(!app.ai.visible, "AI popup should be hidden");
@@ -701,14 +721,16 @@ fn test_visibility_control_mechanisms_complete() {
         ..Default::default()
     };
 
-    let app_enabled = App::new(r#"{"test": "data"}"#.to_string(), &config_enabled);
+    let loader_enabled = create_test_loader(r#"{"test": "data"}"#.to_string());
+    let app_enabled = App::new_with_loader(loader_enabled, &config_enabled);
     assert!(
         app_enabled.ai.visible,
         "Config with AI enabled should set initial visibility to true"
     );
 
     let config_disabled = Config::default();
-    let app_disabled = App::new(r#"{"test": "data"}"#.to_string(), &config_disabled);
+    let loader_disabled = create_test_loader(r#"{"test": "data"}"#.to_string());
+    let app_disabled = App::new_with_loader(loader_disabled, &config_disabled);
     assert!(
         !app_disabled.ai.visible,
         "Config with AI disabled should set initial visibility to false"

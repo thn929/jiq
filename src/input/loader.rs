@@ -18,8 +18,8 @@ pub enum LoadingState {
 
 /// Manages asynchronous file loading in a background thread
 pub struct FileLoader {
-    state: LoadingState,
-    rx: Option<Receiver<Result<String, JiqError>>>,
+    pub state: LoadingState,
+    pub rx: Option<Receiver<Result<String, JiqError>>>,
 }
 
 impl FileLoader {

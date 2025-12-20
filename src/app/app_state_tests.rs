@@ -1,7 +1,7 @@
 //! Tests for app_state
 
 use super::*;
-use crate::test_utils::test_helpers::test_app;
+use crate::test_utils::test_helpers::{create_test_loader, test_app};
 use proptest::prelude::*;
 use std::sync::Arc;
 
@@ -272,7 +272,11 @@ fn test_trigger_ai_request_sends_request_when_configured() {
     // Test that trigger_ai_request sends a request when AI is configured
     let json_input = r#"{"name": "test", "value": 42}"#.to_string();
     let config = Config::default();
-    let mut app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let mut app = App::new_with_loader(loader, &config);
+
+    // Poll the loader to initialize query state
+    app.poll_file_loader();
 
     // Configure AI with channel
     app.ai.configured = true;
@@ -310,7 +314,11 @@ fn test_trigger_ai_request_noop_when_not_configured() {
     // Test that trigger_ai_request does nothing when AI is not configured
     let json_input = r#"{"name": "test"}"#.to_string();
     let config = Config::default();
-    let mut app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let mut app = App::new_with_loader(loader, &config);
+
+    // Poll the loader to initialize query state
+    app.poll_file_loader();
 
     // AI is NOT configured
     app.ai.configured = false;
@@ -330,7 +338,11 @@ fn test_trigger_ai_request_includes_query_context() {
     // Test that trigger_ai_request includes the current query context
     let json_input = r#"{"name": "test", "age": 30}"#.to_string();
     let config = Config::default();
-    let mut app = App::new(json_input, &config);
+    let loader = create_test_loader(json_input);
+    let mut app = App::new_with_loader(loader, &config);
+
+    // Poll the loader to initialize query state
+    app.poll_file_loader();
 
     // Configure AI
     app.ai.configured = true;
