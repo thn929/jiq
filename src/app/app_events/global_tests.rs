@@ -19,8 +19,7 @@ mod help_popup_tests;
 pub(crate) use crate::app::app_state::{App, Focus, OutputMode};
 pub(crate) use crate::editor::EditorMode;
 pub(crate) use crate::test_utils::test_helpers::{
-    TEST_JSON, app_with_query, execute_query_and_wait, key, key_with_mods, test_app,
-    wait_for_query_completion,
+    TEST_JSON, app_with_query, key, key_with_mods, test_app, wait_for_query_completion,
 };
 pub(crate) use ratatui::crossterm::event::{KeyCode, KeyModifiers};
 

@@ -318,8 +318,6 @@ fn test_parse_first_value_returns_none_for_invalid_json() {
 
 #[test]
 fn test_execute_async_basic_flow() {
-    use std::sync::Arc;
-
     let json = r#"{"name": "test", "value": 42}"#;
     let mut state = QueryState::new(json.to_string());
 

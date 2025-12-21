@@ -458,10 +458,9 @@ proptest! {
         let app = App::new_with_loader(loader, &config);
 
         // Verify invariant: if file_loader is Some and Loading, query must be None
-        if let Some(loader) = &app.file_loader {
-            if loader.is_loading() {
+        if let Some(loader) = &app.file_loader
+            && loader.is_loading() {
                 prop_assert!(app.query.is_none(), "Query must be None when file_loader is Loading");
             }
-        }
     }
 }

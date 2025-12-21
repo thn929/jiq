@@ -122,7 +122,7 @@ fn test_complete_loading_flow() {
 ///
 /// **Validates: Requirements 5.1**
 /// - 5.1: WHEN a file does not exist THEN the FileLoader SHALL return an Error state
-///        with a descriptive message
+///   with a descriptive message
 #[test]
 fn test_missing_file_error() {
     use jiq::input::loader::FileLoader;
@@ -173,7 +173,7 @@ fn test_missing_file_error() {
 ///
 /// **Validates: Requirements 5.2**
 /// - 5.2: WHEN a file contains invalid JSON THEN the FileLoader SHALL return an Error state
-///        with parsing error details
+///   with parsing error details
 #[test]
 fn test_invalid_json_error() {
     use jiq::input::loader::FileLoader;
@@ -236,7 +236,7 @@ fn test_invalid_json_error() {
 ///
 /// **Validates: Requirements 5.3**
 /// - 5.3: WHEN a file cannot be read due to permissions THEN the FileLoader SHALL return
-///        an Error state with permission error details
+///   an Error state with permission error details
 #[test]
 #[cfg(unix)] // Permission tests are Unix-specific
 fn test_permission_error() {
