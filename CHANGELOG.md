@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.1] - 2025-12-22
+
+### Added
+- **Rainbow spinner animation** during query processing
+  - Non-intrusive animated spinner in title bar using Braille dot characters
+  - Cycles through 8 rainbow colors (coral, orange, yellow, green, blue, indigo, violet, pink)
+  - Results remain visible during processing - no more screen flashing
+  - Animation speed: ~133ms per frame for smooth, subtle indication
+
+### Changed
+- Removed intrusive "Processing query..." overlay that replaced results
+- Query processing now indicated by small animated spinner in title bar
+
+### Technical
+- Added frame counter to App struct for animation timing
+- Implemented independent character and color cycling (10 chars, 8 colors)
+- Comprehensive test coverage: 9 unit tests + 5 snapshot tests
+
 ## [3.5.0] - 2025-12-20
 
 ### Performance
