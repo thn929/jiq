@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.0] - 2025-12-23
+
+### Performance
+- **Async query execution with worker thread** - Eliminates 58-second UI freeze on large files
+  - Query preprocessing (ANSI parsing, JSON parsing, line metrics) moved to background thread
+  - Non-blocking execution via `execute_async()` and `poll_response()` methods
+  - Cancellable requests using `CancellationToken` for instant abort
+  - UI remains responsive during query execution regardless of file size
+  - Proper panic handling prevents worker thread crashes from corrupting TUI
+- **Dirty flag rendering system** - Eliminates idle CPU usage with on-demand rendering
+  - Added `needs_render` flag to track state changes
+  - Main loop only renders when `should_render()` returns true
+  - `needs_animation()` automatically handles spinner animations
+  - Event handlers mark dirty after state modifications
+  - Reduces CPU usage from continuous redraw to event-driven updates
+- **Pre-rendered ANSI caching** - Eliminates per-frame color conversion overhead
+  - ANSI codes parsed once and cached in `last_successful_result_rendered`
+  - Viewport slicing: only visible lines cloned (50 vs 100K+ for large files)
+  - O(1) instead of O(n) per-render overhead for large result sets
+- **Cached line metrics** - Eliminates redundant line counting on every render
+  - Line count and max width computed once during preprocessing
+  - Cached values reused across frames until query changes
+- **Search optimization** - O(1) match lookup during rendering
+  - `matches_by_line: HashMap<u32, Vec<usize>>` for instant line-based queries
+  - `matches_on_line(line: u32)` method replaces linear search
+  - Significantly faster search highlighting for large result sets
+
+### Fixed
+- Rendered cache now preserved for null query results
+  - Prevents cache loss when query returns null or empty values
+  - Maintains UI stability and performance across query variations
+
+### Tests
+- **Comprehensive test coverage** - 27 new tests for performance features
+  - Dirty flag system: 13 tests (unit + property tests)
+  - Search `matches_by_line`: 11 tests (unit + property tests)
+  - File loader integration: 3 tests
+  - Total test count: 1389 → 1416 tests, all passing
+- **Test organization improvements**
+  - Split `app_render_tests.rs` into focused modules (`basic_ui_tests.rs`, `popup_tests.rs`, etc.)
+  - Removed debug println statements from test code
+
+### Technical
+- New modules: `query/worker/preprocess.rs`, `query/worker/thread.rs`, `query/worker/types.rs`
+- Request/response architecture with `QueryRequest` and `QueryResponse` types
+- Worker thread uses `std::sync::mpsc` channels for communication
+- Zero clippy warnings, zero build warnings, all formatting checks pass
+
 ## [3.6.0] - 2025-12-22
 
 ### Changed
