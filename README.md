@@ -26,7 +26,7 @@
 ![AI Demo](https://raw.githubusercontent.com/bellicose100xp/assets/refs/heads/main/jiq/jiq-v3-demo-ai.gif)
 
 ### Offline Mode (with built-in help)
-![Offline Demo](https://raw.githubusercontent.com/bellicose100xp/assets/refs/heads/main/jiq/jiq-v3-demo.gif)
+![Offline Demo](https://raw.githubusercontent.com/bellicose100xp/assets/refs/heads/main/jiq/jiq-v3-demo-offline.gif)
 
 ## Installation
 
