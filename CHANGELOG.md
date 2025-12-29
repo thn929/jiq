@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.7.3] - 2025-12-28
+
+### Changed
+- **AI context limit increased from 2,000 to 25,000 characters (12.5x)** - Provides AI with significantly more JSON structure and content for better suggestions
+  - Input JSON sample, output sample, and last successful result all use enhanced limit
+  - Improves suggestion quality for complex or deeply nested JSON structures
+
+### Added
+- **Smart JSON minification for 25KB-250KB context** - Automatically compresses pretty-printed JSON to preserve more semantic content
+  - Minification threshold: 10x the context limit (250KB)
+  - Removes whitespace and formatting while preserving all data
+  - Falls back to direct truncation for invalid JSON or sizes >250KB
+  - Negligible performance impact (~8-10ms, <0.5% of typical AI API latency)
+
+### Tests
+- 26 new tests for context preparation and minification logic
+  - 7 unit tests for `try_minify_json()`
+  - 13 unit tests for `prepare_json_for_context()`
+  - 3 integration tests with QueryContext
+  - 3 edge case tests (unicode, deep nesting, special values)
+  - 4 property-based tests for robustness
+- Total test count: 1569 → 1595 tests, all passing
+
 ## [3.7.2] - 2025-12-27
 
 ### Added
