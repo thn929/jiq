@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.0] - 2025-12-29
+
+### Added
+- **Suggestion counter in AI popup** - Shows current selection position (e.g., "Suggestion 2 of 5")
+  - Helps users track their position when navigating through multiple AI suggestions
+  - Displays in the popup header for easy reference
+
+### Improved
+- **Scrolling support in AI suggestion box** - Long suggestions now scrollable for better readability
+  - Automatically scrolls when suggestions exceed popup height
+  - Prevents content truncation for lengthy AI responses
+  - Maintains consistent popup sizing
+- **Natural language query handling** - Enhanced AI prompts for better query interpretation
+  - Improved context and instructions for processing user's natural language intent
+  - Better suggestions when users describe what they want in plain English
+  - More accurate query generation from conversational input
+
+### Changed
+- **Removed word limit constraints from AI responses** - AI can now provide more detailed explanations
+  - No artificial restrictions on response length
+  - Better explanations and context in suggestions
+  - Improved query reasoning and justification
+
 ## [3.7.3] - 2025-12-28
 
 ### Changed
