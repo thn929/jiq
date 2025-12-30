@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.8.1] - 2025-12-29
+
+### Added
+- **Visual state indicators for result states** - Color-coded borders and text to show result status
+  - SUCCESS: Green text and border for current successful query results
+  - EMPTY: Gray text with "∅ No Results | Type | Showing last non-empty result" message
+  - ERROR: Yellow text with "⚠ Syntax Error | Type | Showing last successful result" message
+  - All states use cyan border when results pane is focused, state-specific colors when unfocused
+  - Improves visual feedback about query execution status at a glance
+
+### Changed
+- **AI assistant border color** - Changed from green to magenta to avoid conflict with success state indicator
+  - Maintains clear visual distinction between different UI elements
+  - Prevents confusion between AI suggestions and successful query results
+
+### Fixed
+- **File loading error display** - Prevents nested overlapping error boxes during startup
+  - AI popup no longer renders when query is None during file loading errors
+  - Shows brief notification instead of full error overlay for cleaner error handling
+  - Eliminates visual glitches from multiple error indicators competing for screen space
+
 ## [3.8.0] - 2025-12-29
 
 ### Added
