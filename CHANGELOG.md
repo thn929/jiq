@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.9.0] - 2025-12-31
+
+### Added
+- **JSON response format for AI suggestions** - Structured JSON output from AI providers
+  - Enables better parsing and validation of AI responses
+  - Improves reliability of AI-generated query suggestions
+  - Graceful fallback to text parsing when JSON format fails
+
+### Fixed
+- **AI empty/null output handling** - Enhanced context for empty or null query results
+  - AI now receives additional context when queries return empty/null values
+  - Improved suggestion quality for edge cases
+
+### Changed
+- **Increased AI context limits** - Enhanced context capacity for better suggestions
+  - Raised default context limit from 50KB to 100KB
+  - Raised minification threshold from 250KB to 5MB
+  - Provides AI with more comprehensive JSON structure and content
+  - Updated default configuration documentation to reflect new 100KB limit
+- **Configurable context truncation** - Added max_context_length config option
+  - Users can now customize how much context is sent to AI
+  - Balances suggestion quality vs token usage/costs
+  - Default remains at 100KB for optimal results
+
+### Internal
+- Marked test helper functions as cfg(test) for cleaner production builds
+- Improved metadata field documentation
+- Enhanced code clarity with better inline documentation
+
 ## [3.8.3] - 2025-12-30
 
 ### Fixed
