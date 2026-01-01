@@ -16,7 +16,7 @@
 - **Query history** - Searchable history of successful queries
 - **Clipboard support** - Copy query or results to clipboard (also supports OSC 52 for remote terminals)
 - **VIM keybindings** - VIM-style editing for power users
-- **[EXPERIMENTAL] Syntax highlighting** - Colorized JSON output and jq query syntax
+- **Syntax highlighting** - Colorized JSON output and jq query syntax
 - **Stats bar** - Shows result type and count (e.g., "Array [5 objects]", "Stream [3 values]")
 - **Flexible output** - Export results or query string
 
