@@ -303,10 +303,7 @@ impl QueryState {
         let mut completed_query: Option<String> = None;
 
         // Take the receiver temporarily to avoid borrow checker issues
-        let rx = match self.response_rx.take() {
-            Some(rx) => rx,
-            None => return None,
-        };
+        let rx = self.response_rx.take()?;
 
         // Process all available responses
         // Keep last completed query (if multiple responses, most recent wins)

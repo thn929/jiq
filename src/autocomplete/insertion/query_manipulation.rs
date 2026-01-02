@@ -44,9 +44,7 @@ pub fn extract_middle_query(
 
     // Extract middle - preserve all whitespace as it may be significant
     // (e.g., "then " needs the space before the field access)
-    let middle = current_query[base_len..trigger_pos_in_before_cursor].to_string();
-
-    middle
+    current_query[base_len..trigger_pos_in_before_cursor].to_string()
 }
 
 #[cfg(test)]

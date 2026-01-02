@@ -116,10 +116,7 @@ async fn worker_loop(
     response_tx: Sender<AiResponse>,
 ) {
     // Check if provider was created successfully
-    let provider = match provider_result {
-        Ok(p) => Some(p),
-        Err(_e) => None,
-    };
+    let provider = provider_result.ok();
 
     // Process requests until the channel is closed
     // Using blocking recv() is fine here since we're in a dedicated thread

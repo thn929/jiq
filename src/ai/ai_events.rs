@@ -45,12 +45,12 @@ pub fn handle_suggestion_selection(
 
     let suggestion_count = ai_state.suggestions.len();
 
-    if let Some(index) = keybindings::handle_direct_selection(key, suggestion_count) {
-        if let Some(suggestion) = ai_state.suggestions.get(index) {
-            apply_suggestion(suggestion, input_state, query_state, autocomplete_state);
-            ai_state.selection.clear_selection();
-            return true;
-        }
+    if let Some(index) = keybindings::handle_direct_selection(key, suggestion_count)
+        && let Some(suggestion) = ai_state.suggestions.get(index)
+    {
+        apply_suggestion(suggestion, input_state, query_state, autocomplete_state);
+        ai_state.selection.clear_selection();
+        return true;
     }
 
     if keybindings::handle_navigation(key, &mut ai_state.selection, suggestion_count) {
