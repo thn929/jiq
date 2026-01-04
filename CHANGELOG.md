@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.0] - 2026-01-03
+
+### Added
+- **OpenAI-compatible API endpoint support** - AI provider can now connect to any OpenAI-compatible API
+  - Custom base URL configuration via `base_url` field in provider config
+  - Enables use of local LLM servers (Ollama, LM Studio, etc.)
+  - Supports alternative API providers with OpenAI-compatible interfaces
+  - Configuration example:
+    ```toml
+    [ai]
+    enabled = true
+    provider = "openai"
+
+    [ai.openai]
+    api_key = "not-needed-for-local"
+    model = "llama3.2"
+    base_url = "http://localhost:11434/v1"  # Ollama example
+    ```
+  - Works with Anthropic, OpenAI, Gemini, and Bedrock providers
+  - Allows mixing cloud and local AI models in same configuration
+
 ## [3.9.2] - 2026-01-02
 
 ### Changed
