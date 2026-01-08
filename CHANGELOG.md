@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.3] - 2026-01-07
+
+### Added
+- **Autocomplete suggestions for `fromjson` and `tojson` functions** - JSON string conversion functions now appear in autocomplete
+  - `fromjson` suggestion for parsing JSON strings into objects
+  - `tojson` suggestion for serializing objects into JSON strings
+  - Improves discoverability of string/JSON conversion operations
+
 ## [3.10.2] - 2026-01-07
 
 ### Fixed
