@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.10.5] - 2026-01-12
+
+### Added
+- **Ctrl+D/U navigation from input field** - Page scrolling now works from input field without focus switch
+  - Ctrl+D scrolls results half-page down from input field
+  - Ctrl+U scrolls results half-page up from input field
+  - Maintains focus on input field while navigating results
+  - Improves workflow by eliminating need to switch focus for quick result browsing
+
+### Internal
+- Enhanced test coverage for autocomplete edge cases
+- Refactored insertion logic with focused helper functions for improved maintainability
+
 ## [3.10.4] - 2026-01-09
 
 ### Fixed
