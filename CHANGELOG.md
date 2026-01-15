@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.3] - 2026-01-15
+
+### Added
+- **Visual bracket pair highlighting** - Shows matching brackets when cursor is positioned on them
+  - Highlights matching pairs of (), [], {} when cursor is on opening or closing bracket
+  - Helps identify bracket scope and nesting in complex queries
+  - Improves code navigation and readability
+
+### Fixed
+- Missing import in bracket_matcher module documentation test
+
+### Tests
+- Updated help popup snapshot for $ keybinding
+
 ## [3.11.2] - 2026-01-14
 
 ### Added
