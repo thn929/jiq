@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.11.2] - 2026-01-14
+
+### Added
+- **Vim operator character search motions** - Delete and change operators now work with character search
+  - `df{char}` / `dF{char}` - delete forward/backward to character
+  - `dt{char}` / `dT{char}` - delete till forward/backward (stop before character)
+  - `cf{char}` / `cF{char}` - change forward/backward to character
+  - `ct{char}` / `cT{char}` - change till forward/backward (stop before character)
+  - Combines existing character search motions (f/F/t/T) with delete/change operators
+  - Example usage:
+    - `df"` - delete from cursor to next quote
+    - `ct|` - change from cursor till next pipe
+    - `dT(` - delete backward till opening parenthesis
+  - Enables precise text manipulation using character targets
+
 ## [3.11.1] - 2026-01-14
 
 ### Added

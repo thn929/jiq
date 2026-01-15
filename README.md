@@ -163,9 +163,11 @@ curl https://api.example.com/data | jiq
 | `d$` / `d0` / `d^` | Delete to end/start |
 | `dd` | Delete entire line |
 | `D` | Delete to end of line (same as `d$`) |
+| `df{char}` / `dF{char}` / `dt{char}` / `dT{char}` | Delete to/till character forward/backward |
 | `cw` / `cb` / `ce` | Change word forward/back/end |
 | `c$` / `c0` / `c^` / `cc` | Change to end/start/entire line |
 | `C` | Change to end of line (same as `c$`) |
+| `cf{char}` / `cF{char}` / `ct{char}` / `cT{char}` | Change to/till character forward/backward |
 
 **Text Objects** (delete/change with scope)
 | Key | Action |

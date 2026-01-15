@@ -25,6 +25,7 @@ pub const HELP_ENTRIES: &[(&str, &str)] = &[
     ("x/X", "Delete character"),
     ("dd/D", "Delete line/to end"),
     ("dw/cw/ciw", "Delete/change word (operators)"),
+    ("df/dt/cf/ct", "Delete/change to/till char (operators)"),
     ("di\"/ci\"/da\"/ca\"", "Delete/change quotes (text objects)"),
     ("di(/ci(/da(/ca(", "Delete/change parens (text objects)"),
     ("di|/ci|/da|/ca|", "Delete/change pipe segment"),
