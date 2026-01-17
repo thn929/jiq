@@ -10,7 +10,7 @@
 
 - **Real-time query execution** - See results as you type
 - **AI assistant** - Get intelligent query suggestions, error fixes, and natural language interpretation
-- **Context-aware autocomplete** - Next function or field suggestion with JSON type information for fields
+- **Context-aware autocomplete** - Smart field suggestions with nested path navigation and JSON type hints
 - **Function tooltip** - Quick reference help for jq functions with examples
 - **Search in results** - Find and navigate text in JSON output with highlighting
 - **Query history** - Searchable history of successful queries
@@ -392,7 +392,7 @@ profile = "default"  # Optional: AWS profile name (uses default credential chain
 
 ## Known Limitations
 
-- **Autocomplete** - Suggestions are based on output visible in results area. Editing in the middle of a query may produce suboptimal or no suggestions.
+- **Autocomplete** - Editing in the middle of a query falls back to root-level suggestions.
 - **Syntax highlighting** - Basic keyword-based only, does not analyze structure like tree-sitter.
 
 ## Contributing

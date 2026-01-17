@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.12.0] - 2026-01-17
+
+### Added
+- **Nested path navigation for autocomplete** - Multi-level field suggestions in non-executing contexts
+  - Suggestions now work inside `map()`, `select()`, array builders `[.a, .b]`, and object builders `{key: .val}`
+  - Path parser extracts expressions like `.user.profile.` for JSON tree navigation
+  - Zero-copy navigation using borrowed references for performance
+  - Graceful fallback to root-level suggestions when navigation fails
+
 ## [3.11.3] - 2026-01-15
 
 ### Added
