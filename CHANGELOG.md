@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.12.1] - 2026-01-17
+
+### Added
+- **Scrollable autocomplete popup** - Autocomplete suggestions now scroll when there are many matches
+  - Fixed-width type labels for consistent alignment
+  - Smooth scrolling through long suggestion lists
+  - Improved readability for large JSON structures with many fields
+
 ## [3.12.0] - 2026-01-17
 
 ### Added
