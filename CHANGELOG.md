@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.12.2] - 2026-01-17
+
+### Fixed
+- **AI popup navigation boundaries** - Disable wrap-around when navigating suggestions
+  - Arrow keys now stop at first/last suggestion instead of wrapping
+  - Prevents accidental selection jumps when navigating through suggestions
+
 ## [3.12.1] - 2026-01-17
 
 ### Added
