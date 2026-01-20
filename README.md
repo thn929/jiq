@@ -11,6 +11,7 @@
 - **Real-time query execution** - See results as you type
 - **AI assistant** - Get intelligent query suggestions, error fixes, and natural language interpretation
 - **Context-aware autocomplete** - Smart field suggestions with nested path navigation and JSON type hints
+- **Snippet library** - Save and reuse frequently used jq queries
 - **Function tooltip** - Quick reference help for jq functions with examples
 - **Search in results** - Find and navigate text in JSON output with highlighting
 - **Query history** - Searchable history of successful queries
@@ -268,6 +269,25 @@ The AI assistant analyzes your query and data to provide intelligent suggestions
 | `Alt+j` / `Alt+k` | Navigate suggestions (vim style) |
 | `Enter` | Apply selected suggestion |
 | `Ctrl+A` | Close popup |
+
+</details>
+
+<details>
+<summary><b>Snippet Library</b> (save and reuse queries)</summary>
+
+Save frequently used jq queries for quick access. Snippets are stored in `~/.config/jiq/snippets.toml`.
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+S` | Open snippet library |
+| `↑` / `↓` | Navigate snippets |
+| Type characters | Fuzzy search filter |
+| `Enter` | Apply selected snippet |
+| `n` | Create new snippet from current query |
+| `e` | Edit selected snippet |
+| `d` / `x` | Delete selected snippet |
+| `Tab` / `Shift+Tab` | Cycle fields (in create/edit mode) |
+| `ESC` | Close popup / Cancel edit |
 
 </details>
 

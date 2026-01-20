@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.0] - 2026-01-19
+
+### Added
+- **Snippet library** - Save and reuse frequently used jq queries
+  - `Ctrl+S` to open snippet library popup
+  - Create new snippets from current query with name and optional description
+  - Edit existing snippets (name, query, description)
+  - Delete snippets with confirmation dialog
+  - Fuzzy search to quickly find saved snippets
+  - Apply snippet with `Enter` to replace current query
+  - Snippets persist to `~/.config/jiq/snippets.toml`
+  - Tab/Shift+Tab to cycle between fields in create/edit mode
+
 ## [3.12.2] - 2026-01-17
 
 ### Fixed
