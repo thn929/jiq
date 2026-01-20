@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.5] - 2026-01-19
+
+### Fixed
+- **Search popup focus** - AI assistant and tooltip popups now auto-hide when search is opened
+  - Prevents visual clutter and overlap when entering search mode
+  - Popups restore automatically when search is closed
+
 ## [3.13.4] - 2026-01-19
 
 ### Fixed
