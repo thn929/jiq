@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.3] - 2026-01-19
+
+### Fixed
+- **Snippet manager search interference** - Changed keybindings to use Ctrl modifiers to prevent interference with search query typing
+  - Previously, keybindings without modifiers would trigger actions while typing in the search box
+  - Search input now works correctly without unintended keybinding activation
+
 ## [3.13.2] - 2026-01-19
 
 ### Added
