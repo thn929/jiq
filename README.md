@@ -286,6 +286,7 @@ Save frequently used jq queries for quick access. Snippets are stored in `~/.con
 | `Enter` | Apply selected snippet |
 | `n` | Create new snippet from current query |
 | `e` | Edit selected snippet |
+| `Ctrl+R` | Replace snippet query with current input |
 | `d` / `x` | Delete selected snippet |
 | `Tab` / `Shift+Tab` | Cycle fields (in create/edit mode) |
 | `ESC` | Close popup / Cancel edit |

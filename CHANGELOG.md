@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.6] - 2026-01-20
+
+### Added
+- **Position indicator in results title bar** - Shows current line range and scroll percentage
+  - Format: `L{start}-{end}/{total} ({percent}%)`
+  - Displays visible line range (1-indexed), total line count, and scroll position
+  - Appears in top-right corner of results pane
+
+- **Quick snippet query replacement** - Replace snippet query with current input using `Ctrl+R`
+  - Shows confirmation dialog with old vs new query comparison
+  - Press `Enter` to confirm, `Esc` to cancel
+  - Warns if queries are identical (no changes needed)
+
 ## [3.13.5] - 2026-01-19
 
 ### Fixed
