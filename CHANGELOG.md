@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.10] - 2026-01-21
+
+### Added
+- **Visual cues for unfocused query input** - Query input now shows visual distinction when unfocused
+- **Keyboard shortcuts on search bar and results pane borders** - Shortcuts displayed directly on borders for better discoverability
+- **Context-aware footer shortcuts** - Footer help excludes inapplicable shortcuts in Search and Snippet Manager modes
+
+### Changed
+- **Enhanced bracket highlighting** - Matching brackets now highlighted with yellow color and bold styling for better visibility
+
 ## [3.13.9] - 2026-01-20
 
 ### Fixed
