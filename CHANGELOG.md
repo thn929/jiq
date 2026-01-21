@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.9] - 2026-01-20
+
+### Fixed
+- **Popup key handling layering** - Restructured popup key handling for proper event layering
+  - Fixes issues where key events could be incorrectly captured or passed through overlapping popups
+  - Ensures consistent key behavior across all popup types (AI, search, snippets, history)
+
 ## [3.13.8] - 2026-01-20
 
 ### Changed
