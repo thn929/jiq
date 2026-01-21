@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.8] - 2026-01-20
+
+### Changed
+- **Improved snippet manager keybinding display** - Bottom border now shows shortcuts with proper prefixes
+  - Shortcuts displayed with "Snippet: " prefix for better context
+  - Consistent formatting across all snippet manager states
+  - Improved visual hierarchy in keybinding hints
+
+### Fixed
+- **Search window focus indication** - Active search window now has purple border, inactive has gray
+  - Purple border indicates the active search window for clear focus state
+  - Gray border for inactive state provides visual distinction
+  - Improves usability when switching between search and results
+- **Search UX improvements** - Enhanced visual states and focus restoration
+  - Search mode now maintains proper focus after operations
+  - Visual states clearly indicate search activity
+  - Improved state transitions between search and normal modes
+
 ## [3.13.7] - 2026-01-20
 
 ### Changed
