@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.12] - 2026-01-22
+
+### Added
+- **Bidirectional Tab navigation for search mode** - Tab key now switches between search bar and results pane
+  - Tab in search bar confirms search and moves focus to results pane
+  - Tab in results pane (during search) returns focus to search bar
+- **Enhanced results pane navigation** - Added `Tab` and `i` keys to switch focus back to query input
+  - `i` key follows vim convention for entering insert mode
+  - `Tab` provides consistent navigation across all contexts
+- **Popup auto-hide on focus switch** - AI assistant and tooltip popups automatically hide when switching pane focus
+  - Popups restore when returning to query input
+  - Prevents visual clutter during navigation
+
 ## [3.13.11] - 2026-01-21
 
 ### Added
