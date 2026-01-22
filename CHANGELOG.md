@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.11] - 2026-01-21
+
+### Added
+- **Tabbed Help Popup** - Help popup now has 7 tabs for better organization.
+- **Context-aware Help** - Help popup now shows relevant keybindings based on the current context.
+- **Search Keybinding** - Search results border now shows `Ctrl+F` keybinding.
+
+
+
 ## [3.13.10] - 2026-01-21
 
 ### Added
