@@ -9,7 +9,8 @@ use ratatui::{
 use crate::app::App;
 use crate::autocomplete::SuggestionType;
 use crate::autocomplete::autocomplete_state::MAX_VISIBLE_SUGGESTIONS;
-use crate::widgets::popup;
+use crate::scroll::Scrollable;
+use crate::widgets::{popup, scrollbar};
 
 const MAX_POPUP_WIDTH: usize = 60;
 const POPUP_BORDER_HEIGHT: u16 = 2;
@@ -38,10 +39,13 @@ fn get_display_text(suggestion: &crate::autocomplete::Suggestion) -> &str {
     }
 }
 
-pub fn render_popup(app: &App, frame: &mut Frame, input_area: Rect) {
+/// Render the autocomplete popup
+///
+/// Returns the popup area for region tracking.
+pub fn render_popup(app: &App, frame: &mut Frame, input_area: Rect) -> Option<Rect> {
     let suggestions = app.autocomplete.suggestions();
     if suggestions.is_empty() {
-        return;
+        return None;
     }
 
     let visible_count = suggestions.len().min(MAX_VISIBLE_SUGGESTIONS);
@@ -130,15 +134,36 @@ pub fn render_popup(app: &App, frame: &mut Frame, input_area: Rect) {
 
     popup::clear_area(frame, popup_area);
 
-    let list = List::new(items).block(
-        Block::default()
-            .borders(Borders::ALL)
-            .title(" Suggestions ")
-            .border_style(Style::default().fg(Color::Cyan))
-            .style(Style::default().bg(Color::Black)),
+    let block = Block::default()
+        .borders(Borders::ALL)
+        .title(" Suggestions ")
+        .border_style(Style::default().fg(Color::Cyan))
+        .style(Style::default().bg(Color::Black));
+
+    let list = List::new(items).block(block);
+    frame.render_widget(list, popup_area);
+
+    // Render scrollbar on border (excluding corners), matching border color
+    let scrollbar_area = Rect {
+        x: popup_area.x,
+        y: popup_area.y.saturating_add(1),
+        width: popup_area.width,
+        height: popup_area.height.saturating_sub(2),
+    };
+    let total = app.autocomplete.suggestions().len();
+    let viewport = app.autocomplete.viewport_size();
+    let max_scroll = app.autocomplete.max_scroll();
+    let clamped_offset = app.autocomplete.scroll_offset().min(max_scroll);
+    scrollbar::render_vertical_scrollbar_styled(
+        frame,
+        scrollbar_area,
+        total,
+        viewport,
+        clamped_offset,
+        Color::Cyan,
     );
 
-    frame.render_widget(list, popup_area);
+    Some(popup_area)
 }
 
 #[cfg(test)]

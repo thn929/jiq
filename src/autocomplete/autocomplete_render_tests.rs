@@ -20,7 +20,9 @@ fn render_autocomplete_with_suggestions(suggestions: Vec<Suggestion>) -> String 
     let input_area = Rect::new(0, 0, 80, 3);
 
     terminal
-        .draw(|f| render_popup(&app, f, input_area))
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
         .unwrap();
 
     terminal.backend().to_string()
@@ -39,7 +41,9 @@ fn render_autocomplete_with_scroll(suggestions: Vec<Suggestion>, navigate_down: 
     let input_area = Rect::new(0, 0, 80, 3);
 
     terminal
-        .draw(|f| render_popup(&app, f, input_area))
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
         .unwrap();
 
     terminal.backend().to_string()
@@ -122,7 +126,9 @@ fn snapshot_selection_after_scroll_then_back_up() {
     let input_area = Rect::new(0, 0, 80, 3);
 
     terminal
-        .draw(|f| render_popup(&app, f, input_area))
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
         .unwrap();
 
     assert_snapshot!(terminal.backend().to_string());
@@ -159,7 +165,9 @@ fn snapshot_fixed_width_type_labels_with_varying_field_lengths() {
     let input_area = Rect::new(0, 12, 80, 3);
 
     terminal
-        .draw(|f| render_popup(&app, f, input_area))
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
         .unwrap();
 
     assert_snapshot!(terminal.backend().to_string());
@@ -190,8 +198,60 @@ fn snapshot_truncated_field_names_with_fixed_type_labels() {
     let input_area = Rect::new(0, 12, 80, 3);
 
     terminal
-        .draw(|f| render_popup(&app, f, input_area))
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
         .unwrap();
 
     assert_snapshot!(terminal.backend().to_string());
+}
+
+// =========================================================================
+// Scrollbar Position Tests - verify scrollbar reaches correct positions
+// =========================================================================
+
+fn render_autocomplete_scrollbar_test(navigate_down: usize) -> String {
+    let json = r#"{"name": "test"}"#;
+    let mut app = test_app(json);
+    let suggestions: Vec<Suggestion> = (0..20)
+        .map(|i| Suggestion::new(format!(".field{:02}", i), SuggestionType::Field))
+        .collect();
+    app.autocomplete.update_suggestions(suggestions);
+
+    for _ in 0..navigate_down {
+        app.autocomplete.select_next();
+    }
+
+    let mut terminal = create_test_terminal(80, 20);
+    // Position input area lower so popup appears in visible area above it
+    let input_area = Rect::new(0, 15, 80, 3);
+
+    terminal
+        .draw(|f| {
+            let _ = render_popup(&app, f, input_area);
+        })
+        .unwrap();
+
+    terminal.backend().to_string()
+}
+
+#[test]
+fn snapshot_autocomplete_scrollbar_at_top() {
+    // Default scroll position is at the top
+    let output = render_autocomplete_scrollbar_test(0);
+    assert_snapshot!(output);
+}
+
+#[test]
+fn snapshot_autocomplete_scrollbar_at_middle() {
+    // Navigate to the middle to scroll
+    let output = render_autocomplete_scrollbar_test(10);
+    assert_snapshot!(output);
+}
+
+#[test]
+fn snapshot_autocomplete_scrollbar_at_bottom() {
+    // Navigate to the last suggestion to scroll to the bottom
+    let output = render_autocomplete_scrollbar_test(19);
+    assert_snapshot!(output);
 }

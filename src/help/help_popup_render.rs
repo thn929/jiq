@@ -1,6 +1,6 @@
 use ratatui::{
     Frame,
-    layout::{Constraint, Direction, Layout},
+    layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{Block, Borders, Paragraph, Tabs},
@@ -8,13 +8,16 @@ use ratatui::{
 
 use crate::app::App;
 use crate::help::{HELP_FOOTER, HelpSection, HelpTab, get_tab_content};
-use crate::widgets::popup;
+use crate::widgets::{popup, scrollbar};
 
-pub fn render_popup(app: &mut App, frame: &mut Frame) {
+/// Render the help popup
+///
+/// Returns the popup area for region tracking.
+pub fn render_popup(app: &mut App, frame: &mut Frame) -> Option<Rect> {
     let frame_area = frame.area();
 
     if frame_area.width < 40 || frame_area.height < 15 {
-        return;
+        return None;
     }
 
     // Popup dimensions - use 80% of screen (min 70x20, max 90x30)
@@ -80,6 +83,28 @@ pub fn render_popup(app: &mut App, frame: &mut Frame) {
         Style::default().fg(Color::DarkGray),
     ));
     frame.render_widget(Paragraph::new(footer).centered(), chunks[3]);
+
+    // Render scrollbar on outer border (excluding corners), matching border color
+    let scrollbar_area = Rect {
+        x: popup_area.x,
+        y: popup_area.y.saturating_add(1),
+        width: popup_area.width,
+        height: popup_area.height.saturating_sub(2),
+    };
+    let scroll = app.help.current_scroll();
+    let viewport = scroll.viewport_height as usize;
+    let max_scroll = scroll.max_offset as usize;
+    let clamped_offset = (scroll.offset as usize).min(max_scroll);
+    scrollbar::render_vertical_scrollbar_styled(
+        frame,
+        scrollbar_area,
+        content_height as usize,
+        viewport,
+        clamped_offset,
+        Color::Cyan,
+    );
+
+    Some(popup_area)
 }
 
 fn render_tab_bar(active_tab: HelpTab) -> Tabs<'static> {

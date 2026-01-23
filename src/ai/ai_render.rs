@@ -12,7 +12,8 @@ use ratatui::{
 };
 
 use super::ai_state::AiState;
-use crate::widgets::popup;
+use crate::scroll::Scrollable;
+use crate::widgets::{popup, scrollbar};
 
 // Use modules from render submodule instead of loading them directly
 use super::render::layout;
@@ -97,7 +98,7 @@ fn render_suggestions_as_widgets(
         ai_state.selection.ensure_selected_visible();
     }
 
-    let scroll_offset = ai_state.selection.scroll_offset();
+    let scroll_offset = ai_state.selection.scroll_offset_u16();
     let viewport_end = scroll_offset.saturating_add(inner_area.height);
     let selected_index = ai_state.selection.get_selected();
 
@@ -231,13 +232,15 @@ fn render_suggestions_as_widgets(
 
 /// Render the AI assistant popup
 ///
+/// Returns the popup area for region tracking.
+///
 /// # Arguments
 /// * `ai_state` - The current AI state
 /// * `frame` - The frame to render to
 /// * `input_area` - The input bar area (popup renders above this)
-pub fn render_popup(ai_state: &mut AiState, frame: &mut Frame, input_area: Rect) {
+pub fn render_popup(ai_state: &mut AiState, frame: &mut Frame, input_area: Rect) -> Option<Rect> {
     if !ai_state.visible {
-        return;
+        return None;
     }
 
     let frame_area = frame.area();
@@ -255,35 +258,17 @@ pub fn render_popup(ai_state: &mut AiState, frame: &mut Frame, input_area: Rect)
             .saturating_sub(AUTOCOMPLETE_RESERVED_WIDTH)
             .saturating_sub(4); // Account for borders
         let content_height = calculate_suggestions_height(ai_state, max_content_width);
-        let area = match calculate_popup_area_with_height(frame_area, input_area, content_height) {
-            Some(area) => area,
-            None => return,
-        };
+        let area = calculate_popup_area_with_height(frame_area, input_area, content_height)?;
         // Store the height for use during loading transitions
         ai_state.previous_popup_height = Some(area.height);
         area
     } else if let Some(prev_height) = ai_state.previous_popup_height {
         // Use previous height to maintain size during loading/transitions
-        match calculate_popup_area_with_height(
-            frame_area,
-            input_area,
-            prev_height.saturating_sub(4),
-        ) {
-            Some(area) => area,
-            None => {
-                // Fallback to default sizing if previous height doesn't fit
-                match calculate_popup_area(frame_area, input_area) {
-                    Some(area) => area,
-                    None => return,
-                }
-            }
-        }
+        calculate_popup_area_with_height(frame_area, input_area, prev_height.saturating_sub(4))
+            .or_else(|| calculate_popup_area(frame_area, input_area))?
     } else {
         // No previous height - use default sizing
-        match calculate_popup_area(frame_area, input_area) {
-            Some(area) => area,
-            None => return,
-        }
+        calculate_popup_area(frame_area, input_area)?
     };
 
     popup::clear_area(frame, popup_area);
@@ -374,6 +359,29 @@ pub fn render_popup(ai_state: &mut AiState, frame: &mut Frame, input_area: Rect)
         let inner_area = block.inner(popup_area);
         let max_width = inner_area.width;
         render_suggestions_as_widgets(ai_state, frame, inner_area, max_width);
+
+        // Render scrollbar on border (excluding corners), matching border color
+        let scrollbar_area = Rect {
+            x: popup_area.x,
+            y: popup_area.y.saturating_add(1),
+            width: popup_area.width,
+            height: popup_area.height.saturating_sub(2),
+        };
+        let total_content_height: usize = ai_state
+            .selection
+            .viewport_size()
+            .saturating_add(ai_state.selection.max_scroll());
+        let viewport = ai_state.selection.viewport_size();
+        let max_scroll = ai_state.selection.max_scroll();
+        let clamped_offset = ai_state.selection.scroll_offset().min(max_scroll);
+        scrollbar::render_vertical_scrollbar_styled(
+            frame,
+            scrollbar_area,
+            total_content_height,
+            viewport,
+            clamped_offset,
+            Color::Cyan,
+        );
     } else {
         // Use traditional content-based rendering for non-suggestion content
         let content = build_content(ai_state, popup_area.width.saturating_sub(4));
@@ -382,4 +390,6 @@ pub fn render_popup(ai_state: &mut AiState, frame: &mut Frame, input_area: Rect)
             .block(block);
         frame.render_widget(popup_widget, popup_area);
     }
+
+    Some(popup_area)
 }
