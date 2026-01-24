@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.0] - 2026-01-23
+
+### Added
+- **Query execution time display** - Shows query execution time in the results pane
+  - Displays timing in bottom-left corner of results window
+  - Color-coded performance indicators: green (<200ms), yellow (200-1000ms), red (>1000ms)
+  - Compact format: "42ms" or "1.2s" for longer queries
+  - Measures actual execution time (jq + preprocessing, excludes debounce delay)
+
 ## [3.16.0] - 2026-01-23
 
 ### Added
