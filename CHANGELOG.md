@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.16.0] - 2026-01-23
+
+### Added
+- **Automatic JSONL support** - Auto-detection and parsing of newline-delimited JSON (JSONL/NDJSON) input
+  - Automatically detects JSONL format when input contains multiple JSON objects separated by newlines
+  - Wraps JSONL content in a JSON array for seamless jq processing
+  - Works with both file input and stdin piping
+  - No manual flags required - format detection is automatic
+
 ## [3.15.1] - 2026-01-23
 
 ### Fixed
