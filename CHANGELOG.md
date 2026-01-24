@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.15.1] - 2026-01-23
+
+### Fixed
+- **Search confirmation on click** - Clicking on results pane now confirms search when search is active
+  - Previously clicking results pane did not confirm the search
+  - Now clicking behaves consistently with pressing Tab to confirm search
+
 ## [3.15.0] - 2026-01-23
 
 ### Added
