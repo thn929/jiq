@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.3] - 2026-01-25
+
+### Performance
+- **Cached line widths** - Eliminate O(n) computation per render frame
+  - Line widths now computed once in worker thread when query results return
+  - Previously allocated ~200KB per frame for large files (100K+ lines)
+  - Reduces per-frame overhead for smoother scrolling on large result sets
+- **Combined JSON parsing** - Eliminate duplicate parse with `parse_and_detect_type`
+  - JSON is now parsed once for both type detection and value extraction
+  - Removes redundant parsing that occurred on every query result
+
 ## [3.17.2] - 2026-01-24
 
 ### Added
