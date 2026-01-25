@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.2] - 2026-01-24
+
+### Added
+- **Mouse support for query input box** - Click to position cursor in query input field
+  - Click anywhere in the query input to move cursor to that position
+  - Complements existing keyboard navigation for flexible input editing
+
 ## [3.17.1] - 2026-01-24
 
 ### Added
