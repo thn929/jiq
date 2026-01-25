@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.4] - 2026-01-25
+
+### Performance
+- **Moved `is_only_nulls` check to worker thread** - Eliminates main thread computation during rendering
+  - Null detection now performed during preprocessing in background thread
+  - Reduces per-frame overhead for queries that return null values
+
 ## [3.17.3] - 2026-01-25
 
 ### Performance
