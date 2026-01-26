@@ -27,7 +27,7 @@ After each phase:
 - [x] Phase 5: Migrate Simple Utilities (scrollbar, help_line, notification)
 - [x] Phase 6: Migrate Help Popup
 - [x] Phase 7: Migrate History Popup
-- [ ] Phase 8: Migrate Snippets Popup
+- [x] Phase 8: Migrate Snippets Popup
 - [ ] Phase 9: Migrate AI Window
 - [ ] Phase 10: Migrate Autocomplete & Tooltip
 - [ ] Phase 11: Migrate Syntax Highlighting
