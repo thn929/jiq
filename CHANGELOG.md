@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.17.7] - 2026-01-26
+
+### Changed
+- **Modernized UI with rounded borders** - Updated border style from sharp corners to rounded for a more polished appearance
+  - All panes and popups now use rounded corners
+  - Consistent visual styling across the entire interface
+
 ## [3.17.6] - 2026-01-25
 
 ### Performance
