@@ -29,7 +29,7 @@ After each phase:
 - [x] Phase 7: Migrate History Popup
 - [x] Phase 8: Migrate Snippets Popup
 - [x] Phase 9: Migrate AI Window
-- [ ] Phase 10: Migrate Autocomplete & Tooltip
+- [x] Phase 10: Migrate Autocomplete & Tooltip
 - [ ] Phase 11: Migrate Syntax Highlighting
 - [ ] Phase 12: Cleanup & Documentation
 
