@@ -233,40 +233,42 @@ pub mod ai {
     pub const SCROLLBAR: Color = Color::Cyan;
     pub const TITLE: Style = Style::new().fg(Color::Cyan).add_modifier(Modifier::BOLD);
 
-    // Model info (underlined for clickable appearance)
-    pub const MODEL_NAME: Style = Style::new()
+    // Model display in title bar
+    pub const MODEL_DISPLAY: Color = Color::Blue;
+
+    // Selection counter in title
+    pub const COUNTER: Color = Color::Yellow;
+
+    // Config not set state
+    pub const CONFIG_ICON: Color = Color::Yellow;
+    pub const CONFIG_TITLE: Style = Style::new().fg(Color::Yellow).add_modifier(Modifier::BOLD);
+    pub const CONFIG_DESC: Color = Color::Gray;
+    pub const CONFIG_CODE: Color = Color::Cyan;
+    pub const CONFIG_LINK: Style = Style::new()
         .fg(Color::Blue)
         .add_modifier(Modifier::UNDERLINED);
-
-    // Loading state
-    pub const LOADING_ICON: Color = Color::Yellow;
-    pub const LOADING_TEXT: Style = Style::new().fg(Color::Yellow).add_modifier(Modifier::BOLD);
-    pub const TOKEN_COUNT: Color = Color::Gray;
 
     // Thinking state
     pub const THINKING_ICON: Color = Color::Yellow;
     pub const THINKING_TEXT: Style = Style::new()
         .fg(Color::Yellow)
-        .add_modifier(Modifier::BOLD)
         .add_modifier(Modifier::ITALIC);
 
     // Error state
     pub const ERROR_ICON: Color = Color::Red;
     pub const ERROR_TITLE: Style = Style::new().fg(Color::Red).add_modifier(Modifier::BOLD);
     pub const ERROR_MESSAGE: Color = Color::Red;
-    pub const RETRY_HINT: Color = Color::DarkGray;
 
     // Content text
     pub const QUERY_TEXT: Color = Color::Cyan;
-    pub const STATUS_TEXT: Color = Color::Cyan;
     pub const RESULT_TEXT: Color = Color::White;
+    pub const PREVIOUS_RESPONSE: Color = Color::DarkGray;
 
     // Suggestion list
     pub const SUGGESTION_SELECTED_BG: Color = Color::DarkGray;
     pub const SUGGESTION_HOVERED_BG: Color = Color::Indexed(236);
     pub const SUGGESTION_TEXT_SELECTED: Color = Color::Black;
     pub const SUGGESTION_TEXT_NORMAL: Color = Color::DarkGray;
-    pub const SUGGESTION_NAME: Color = Color::Cyan;
     pub const SUGGESTION_DESC_NORMAL: Color = Color::DarkGray;
     pub const SUGGESTION_DESC_MUTED: Color = Color::Gray;
 
@@ -277,7 +279,6 @@ pub mod ai {
 
     // Hints
     pub const HINT: Color = Color::DarkGray;
-    pub const KEY_HINT: Color = Color::Yellow;
 }
 
 /// Autocomplete dropdown styles
