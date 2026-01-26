@@ -24,7 +24,7 @@ After each phase:
 - [x] Phase 2: Migrate Results Pane
 - [x] Phase 3: Migrate Input Field
 - [x] Phase 4: Migrate Search Bar
-- [ ] Phase 5: Migrate Simple Utilities (scrollbar, help_line, notification)
+- [x] Phase 5: Migrate Simple Utilities (scrollbar, help_line, notification)
 - [ ] Phase 6: Migrate Help Popup
 - [ ] Phase 7: Migrate History Popup
 - [ ] Phase 8: Migrate Snippets Popup
