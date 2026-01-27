@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.20.0] - 2026-01-27
+
+### Added
+- **Galaxy theme** - New vibrant color theme with cosmic-inspired palette
+  - Accessible via theme configuration
+  - Features bold, high-contrast colors for improved visibility
+
+### Fixed
+- **Removed arrow indicator from autocomplete suggestions** - Cleaner visual appearance for autocomplete dropdown
+- **Tests updated to use theme colors** - Test suite now references theme constants instead of hardcoded color values
+
 ## [3.19.0] - 2026-01-27
 
 ### Added
