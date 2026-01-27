@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.18.3] - 2026-01-26
+
+### Changed
+- **Unified border keyboard shortcuts styling** - Consistent styling applied to keyboard shortcut hints displayed in pane borders
+
+### Fixed
+- **Popups now close on mouse click focus switch** - Clicking to switch focus to the results pane now properly closes any open popups (history, snippets, help)
+
 ## [3.18.2] - 2026-01-26
 
 ### Changed
