@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.19.0] - 2026-01-27
+
+### Added
+- **`/` shortcut in normal mode to open search** - Quick access to search functionality from normal mode in the query input field
+- **Modernized snippet manager selection indicator** - Updated visual design with improved clarity and styling
+
+### Fixed
+- **Mode indicator shows red when input has error** - Visual feedback now indicates syntax errors in the mode indicator
+- **Simplified error display with red border** - Error state now shown with red border instead of title text for cleaner UI
+- **Improved history popup visual design** - Enhanced visual appearance and layout of the history popup
+
 ## [3.18.4] - 2026-01-26
 
 ### Fixed
