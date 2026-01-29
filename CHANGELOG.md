@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.20.3] - 2026-01-29
+
+### Added
+- **Auto-quoting for non-simple field names in autocomplete** - Field names containing special characters are now automatically wrapped in quotes (thanks @thn929!)
+  - Field names with spaces, hyphens, or other special characters are suggested as `.["field-name"]` instead of `.field-name`
+  - Ensures syntactically valid jq queries when accepting autocomplete suggestions
+
 ## [3.20.2] - 2026-01-27
 
 ### Added
