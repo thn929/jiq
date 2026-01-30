@@ -24,7 +24,7 @@
 
 ## Demo
 
-### Demo
+### Autocompletion
 ![Demo](https://raw.githubusercontent.com/bellicose100xp/assets/refs/heads/main/jiq/jiq-demo-v3.20.gif)
 
 ### With AI Assistant
