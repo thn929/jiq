@@ -1,5 +1,6 @@
 pub mod autocomplete_render;
 pub mod autocomplete_state;
+mod array_key_enrichment;
 mod brace_tracker;
 mod context;
 pub mod insertion;
@@ -8,6 +9,8 @@ pub mod json_navigator;
 pub mod path_parser;
 mod result_analyzer;
 mod scan_state;
+mod target_level;
+mod target_level_router;
 mod variable_extractor;
 
 #[cfg(test)]

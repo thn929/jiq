@@ -1,3 +1,4 @@
+use super::array_key_enrichment::select_array_fields_for_suggestions;
 use crate::autocomplete::autocomplete_state::{JsonFieldType, Suggestion, SuggestionType};
 use crate::query::ResultType;
 use serde_json::Value;
@@ -86,14 +87,12 @@ impl ResultAnalyzer {
                 }
 
                 // If array contains objects, suggest their fields
-                if let Some(Value::Object(map)) = arr.first() {
-                    for (key, val) in map {
-                        let field_type = Self::detect_json_type(val);
+                for (key, field_type) in select_array_fields_for_suggestions(arr) {
                         let field_text = if suppress_array_brackets {
-                            Self::format_field_name(prefix, key)
+                            Self::format_field_name(prefix, &key)
                         } else {
                             // For array iteration syntax, quote non-simple identifiers
-                            if Self::is_simple_jq_identifier(key) {
+                            if Self::is_simple_jq_identifier(&key) {
                                 // Simple identifier: .[].fieldname
                                 format!("{}[].{}", prefix, key)
                             } else {
@@ -107,7 +106,6 @@ impl ResultAnalyzer {
                             Some(field_type),
                         ));
                     }
-                }
 
                 suggestions
             }
@@ -159,18 +157,15 @@ impl ResultAnalyzer {
                     ));
                 }
 
-                if let Value::Array(arr) = value
-                    && let Some(Value::Object(map)) = arr.first()
-                {
-                    for (key, val) in map {
-                        let field_type = Self::detect_json_type(val);
+                if let Value::Array(arr) = value {
+                    for (key, field_type) in select_array_fields_for_suggestions(arr) {
                         // When suppressing brackets, suggest ".field"
                         // Otherwise, suggest ".[].field" with quoting if needed
                         let field_text = if suppress_array_brackets {
-                            Self::format_field_name(prefix, key)
+                            Self::format_field_name(prefix, &key)
                         } else {
                             // Apply quoting logic for array iteration
-                            if Self::is_simple_jq_identifier(key) {
+                            if Self::is_simple_jq_identifier(&key) {
                                 format!("{}[].{}", prefix, key)
                             } else {
                                 format!("{}[].\"{}\"", prefix, key)

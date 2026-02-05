@@ -5,6 +5,7 @@ use super::json_navigator::navigate;
 use super::path_parser::{PathSegment, parse_path};
 use super::result_analyzer::ResultAnalyzer;
 use super::scan_state::ScanState;
+use super::target_level_router::get_nested_target_suggestions;
 use super::variable_extractor::extract_variables;
 use crate::query::ResultType;
 use serde_json::Value;
@@ -649,28 +650,32 @@ pub fn get_suggestions(
                 let (path_context, is_after_pipe) =
                     extract_path_context_with_pipe_info(before_cursor, brace_tracker);
 
-                // Try navigating from last_successful_result first
                 if let Some(ref result) = result_parsed {
-                    if let Some(nested_suggestions) = get_nested_field_suggestions(
-                        result,
+                    if let Some(nested_suggestions) = get_nested_target_suggestions(
                         &path_context,
                         needs_dot,
                         suppress_array_brackets,
                         suppress_array_brackets, // is_in_element_context == suppress_array_brackets
                         is_after_pipe,
+                        true,
+                        true,
                         result_type.as_ref(),
+                        Some(result.as_ref()),
+                        original_json.as_deref(),
                     ) {
                         nested_suggestions
                     } else if let Some(ref orig) = original_json {
-                        // Navigation failed, fall back to original_json
-                        get_nested_field_suggestions(
-                            orig,
+                        get_nested_target_suggestions(
                             &path_context,
                             needs_dot,
                             suppress_array_brackets,
                             suppress_array_brackets,
                             is_after_pipe,
+                            true,
+                            true,
                             result_type.as_ref(),
+                            None,
+                            Some(orig.as_ref()),
                         )
                         .unwrap_or_else(|| {
                             // Non-deterministic: show all fields from original JSON
@@ -689,14 +694,17 @@ pub fn get_suggestions(
                     extract_path_context_with_pipe_info(before_cursor, brace_tracker);
 
                 if let Some(ref orig) = original_json {
-                    get_nested_field_suggestions(
-                        orig,
+                    get_nested_target_suggestions(
                         &path_context,
                         needs_dot,
                         suppress_array_brackets,
                         suppress_array_brackets,
                         is_after_pipe,
+                        false,
+                        false,
                         result_type.as_ref(),
+                        None,
+                        Some(orig.as_ref()),
                     )
                     .unwrap_or_else(|| {
                         // Non-deterministic: show all fields from original JSON
@@ -919,6 +927,10 @@ fn extract_path_context_with_pipe_info(
     (path, boundary.is_after_pipe)
 }
 
+/// Deprecated shim kept temporarily to make the routing migration explicit.
+#[deprecated(note = "Use target_level_router::get_nested_target_suggestions")]
+#[allow(dead_code)]
+#[allow(clippy::too_many_arguments)]
 /// Get nested field suggestions by navigating the JSON tree.
 /// This is the core Phase 3 integration point.
 fn get_nested_field_suggestions(
