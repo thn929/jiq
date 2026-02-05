@@ -38,6 +38,11 @@ fn decision_table_resolve_target_level() {
     let mut after_pipe = base_input(".");
     after_pipe.is_after_pipe = true;
 
+    let provenance_segments = vec![PathSegment::Field("services".to_string())];
+    let mut after_pipe_with_provenance = base_input(".");
+    after_pipe_with_provenance.is_after_pipe = true;
+    after_pipe_with_provenance.array_provenance = Some(&provenance_segments);
+
     let mut middle_of_query = base_input(".services.");
     middle_of_query.is_at_end = false;
 
@@ -53,7 +58,9 @@ fn decision_table_resolve_target_level() {
     element_streaming.is_in_element_context = true;
     element_streaming.result_type = Some(&ResultType::DestructuredObjects);
 
-    let provenance_segments = vec![PathSegment::Field("services".to_string())];
+    let mut streaming_trailing_iterator = base_input(".services[]");
+    streaming_trailing_iterator.result_type = Some(&ResultType::DestructuredObjects);
+
     let mut element_with_provenance = base_input(".");
     element_with_provenance.is_in_element_context = true;
     element_with_provenance.result_type = Some(&ResultType::DestructuredObjects);
@@ -88,6 +95,14 @@ fn decision_table_resolve_target_level() {
             name: "after pipe with empty path resolves to all fields fallback",
             input: after_pipe,
             expected: TargetLevel::AllKnownFields,
+        },
+        Case {
+            name: "after pipe uses provenance when available",
+            input: after_pipe_with_provenance,
+            expected: TargetLevel::ArrayElementsAtPath {
+                source: TargetSource::ResultCache,
+                array_segments: vec![PathSegment::Field("services".to_string())],
+            },
         },
         Case {
             name: "non-executing prefers cache",
@@ -140,6 +155,14 @@ fn decision_table_resolve_target_level() {
             expected: TargetLevel::ValueAtPath {
                 source: TargetSource::ResultCache,
                 segments: vec![PathSegment::Field("deploymentConfiguration".to_string())],
+            },
+        },
+        Case {
+            name: "streaming trailing iterator uses original json source",
+            input: streaming_trailing_iterator,
+            expected: TargetLevel::ArrayElementsAtPath {
+                source: TargetSource::OriginalJson,
+                array_segments: vec![PathSegment::Field("services".to_string())],
             },
         },
         Case {

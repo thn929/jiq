@@ -651,7 +651,6 @@ pub fn get_suggestions(
                 // Cache is stale, extract path and navigate from cache or original
                 let (path_context, is_after_pipe) =
                     extract_path_context_with_pipe_info(before_cursor, brace_tracker);
-
                 if let Some(ref result) = result_parsed {
                     if let Some(nested_suggestions) = get_nested_target_suggestions(
                         &path_context,
@@ -696,7 +695,6 @@ pub fn get_suggestions(
                 // MIDDLE OF QUERY: Cache is "ahead" of cursor, navigate from original_json
                 let (path_context, is_after_pipe) =
                     extract_path_context_with_pipe_info(before_cursor, brace_tracker);
-
                 if let Some(ref orig) = original_json {
                     get_nested_target_suggestions(
                         &path_context,
@@ -721,13 +719,39 @@ pub fn get_suggestions(
                 }
             } else {
                 // EXECUTING CONTEXT + CURSOR AT END:
-                // Cache is current, suggest its fields directly
-                get_field_suggestions(
-                    result_parsed.clone(),
-                    result_type.clone(),
-                    needs_dot,
-                    suppress_array_brackets,
-                )
+                // Cache is current; prefer path-aware routing, then fall back.
+                let (path_context, is_after_pipe) =
+                    extract_path_context_with_pipe_info(before_cursor, brace_tracker);
+                if let Some(ref result) = result_parsed {
+                    get_nested_target_suggestions(
+                        &path_context,
+                        needs_dot,
+                        suppress_array_brackets,
+                        suppress_array_brackets,
+                        is_after_pipe,
+                        false,
+                        true,
+                        result_type.as_ref(),
+                        Some(result.as_ref()),
+                        original_json.as_deref(),
+                        array_provenance.as_deref(),
+                    )
+                    .unwrap_or_else(|| {
+                        get_field_suggestions(
+                            result_parsed.clone(),
+                            result_type.clone(),
+                            needs_dot,
+                            suppress_array_brackets,
+                        )
+                    })
+                } else {
+                    get_field_suggestions(
+                        result_parsed.clone(),
+                        result_type.clone(),
+                        needs_dot,
+                        suppress_array_brackets,
+                    )
+                }
             };
 
             // Inject .key/.value for direct entry context (to_entries/with_entries)

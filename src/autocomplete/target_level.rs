@@ -58,38 +58,42 @@ pub struct ResolveTargetInput<'a> {
 /// policy can be applied consistently across query shapes.
 pub fn resolve_target_level(input: &ResolveTargetInput<'_>) -> TargetLevel {
     let mut parsed_path = parse_path(input.path_context);
-
     // Keep existing Phase 7 behavior.
     let is_streaming = matches!(input.result_type, Some(ResultType::DestructuredObjects));
     if input.is_in_element_context && !is_streaming {
         parsed_path.segments.insert(0, PathSegment::ArrayIterator);
     }
 
-    if parsed_path.segments.is_empty() && input.is_after_pipe {
-        return TargetLevel::AllKnownFields;
-    }
-
     let Some(source) = choose_source(input) else {
         return TargetLevel::None;
+    };
+
+    let array_source = if is_streaming && input.has_original_json {
+        TargetSource::OriginalJson
+    } else {
+        source
     };
 
     if matches!(parsed_path.segments.last(), Some(PathSegment::ArrayIterator)) {
         parsed_path.segments.pop();
         return TargetLevel::ArrayElementsAtPath {
-            source,
+            source: array_source,
             array_segments: parsed_path.segments,
         };
     }
 
-    if input.is_in_element_context
-        && parsed_path.segments.is_empty()
+    if parsed_path.segments.is_empty()
         && let Some(provenance) = input.array_provenance
         && !provenance.is_empty()
     {
         return TargetLevel::ArrayElementsAtPath {
-            source,
+            source: array_source,
             array_segments: provenance.to_vec(),
         };
+    }
+
+    if parsed_path.segments.is_empty() && input.is_after_pipe {
+        return TargetLevel::AllKnownFields;
     }
 
     TargetLevel::ValueAtPath {
