@@ -10,6 +10,7 @@ fn base_input(path_context: &str) -> ResolveTargetInput<'_> {
         result_type: Some(&ResultType::Object),
         has_result_cache: true,
         has_original_json: true,
+        array_provenance: None,
     }
 }
 
@@ -51,6 +52,12 @@ fn decision_table_resolve_target_level() {
     let mut element_streaming = base_input(".deploymentConfiguration.");
     element_streaming.is_in_element_context = true;
     element_streaming.result_type = Some(&ResultType::DestructuredObjects);
+
+    let provenance_segments = vec![PathSegment::Field("services".to_string())];
+    let mut element_with_provenance = base_input(".");
+    element_with_provenance.is_in_element_context = true;
+    element_with_provenance.result_type = Some(&ResultType::DestructuredObjects);
+    element_with_provenance.array_provenance = Some(&provenance_segments);
 
     let mut element_non_streaming_trailing_iterator = base_input(".tasks[]");
     element_non_streaming_trailing_iterator.is_in_element_context = true;
@@ -133,6 +140,14 @@ fn decision_table_resolve_target_level() {
             expected: TargetLevel::ValueAtPath {
                 source: TargetSource::ResultCache,
                 segments: vec![PathSegment::Field("deploymentConfiguration".to_string())],
+            },
+        },
+        Case {
+            name: "element context uses provenance when local path has no iterator",
+            input: element_with_provenance,
+            expected: TargetLevel::ArrayElementsAtPath {
+                source: TargetSource::ResultCache,
+                array_segments: vec![PathSegment::Field("services".to_string())],
             },
         },
         Case {

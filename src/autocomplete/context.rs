@@ -3,6 +3,7 @@ use super::brace_tracker::{BraceTracker, BraceType};
 use super::jq_functions::filter_builtins;
 use super::json_navigator::navigate;
 use super::path_parser::{PathSegment, parse_path};
+use super::provenance::extract_array_provenance;
 use super::result_analyzer::ResultAnalyzer;
 use super::scan_state::ScanState;
 use super::target_level_router::get_nested_target_suggestions;
@@ -633,6 +634,7 @@ pub fn get_suggestions(
             let needs_dot = needs_leading_dot(before_cursor, &partial);
             let is_at_end = is_cursor_at_logical_end(query, cursor_pos);
             let is_non_executing = brace_tracker.is_in_non_executing_context(cursor_pos);
+            let array_provenance = extract_array_provenance(before_cursor);
 
             // Unified entry context detection for to_entries/with_entries
             let entry_context = detect_entry_context(query, cursor_pos);
@@ -662,6 +664,7 @@ pub fn get_suggestions(
                         result_type.as_ref(),
                         Some(result.as_ref()),
                         original_json.as_deref(),
+                        array_provenance.as_deref(),
                     ) {
                         nested_suggestions
                     } else if let Some(ref orig) = original_json {
@@ -676,6 +679,7 @@ pub fn get_suggestions(
                             result_type.as_ref(),
                             None,
                             Some(orig.as_ref()),
+                            array_provenance.as_deref(),
                         )
                         .unwrap_or_else(|| {
                             // Non-deterministic: show all fields from original JSON
@@ -705,6 +709,7 @@ pub fn get_suggestions(
                         result_type.as_ref(),
                         None,
                         Some(orig.as_ref()),
+                        array_provenance.as_deref(),
                     )
                     .unwrap_or_else(|| {
                         // Non-deterministic: show all fields from original JSON

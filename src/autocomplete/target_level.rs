@@ -48,6 +48,8 @@ pub struct ResolveTargetInput<'a> {
     pub has_result_cache: bool,
     /// Whether original input JSON exists.
     pub has_original_json: bool,
+    /// Optional provenance path for the most recent array iterator.
+    pub array_provenance: Option<&'a [PathSegment]>,
 }
 
 /// Resolve target level/source for autocomplete.
@@ -76,6 +78,17 @@ pub fn resolve_target_level(input: &ResolveTargetInput<'_>) -> TargetLevel {
         return TargetLevel::ArrayElementsAtPath {
             source,
             array_segments: parsed_path.segments,
+        };
+    }
+
+    if input.is_in_element_context
+        && parsed_path.segments.is_empty()
+        && let Some(provenance) = input.array_provenance
+        && !provenance.is_empty()
+    {
+        return TargetLevel::ArrayElementsAtPath {
+            source,
+            array_segments: provenance.to_vec(),
         };
     }
 

@@ -7,6 +7,7 @@ pub mod insertion;
 pub mod jq_functions;
 pub mod json_navigator;
 pub mod path_parser;
+mod provenance;
 mod result_analyzer;
 mod scan_state;
 mod target_level;

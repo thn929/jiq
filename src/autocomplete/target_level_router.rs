@@ -22,6 +22,7 @@ pub fn get_nested_target_suggestions(
     result_type: Option<&ResultType>,
     result_parsed: Option<&Value>,
     original_json: Option<&Value>,
+    array_provenance: Option<&[super::path_parser::PathSegment]>,
 ) -> Option<Vec<Suggestion>> {
     let target = resolve_target_level(&ResolveTargetInput {
         path_context,
@@ -32,6 +33,7 @@ pub fn get_nested_target_suggestions(
         result_type,
         has_result_cache: result_parsed.is_some(),
         has_original_json: original_json.is_some(),
+        array_provenance,
     });
 
     match target {
